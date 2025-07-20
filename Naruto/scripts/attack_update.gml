@@ -240,7 +240,9 @@ switch(attack) {
                 if (free) hsp *= 0.99;
 
                 switch (window) {
+
                         // Phase 1 - Charge init
+
                         case 1:
                                 if (window_timer == 1) {
                                         beam_juice = 0;
@@ -251,7 +253,9 @@ switch(attack) {
                                 }
                         break;
 
+
                         // Phase 1 - Charge loop
+
                         case 2:
                                 vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
                                 if (special_down && beam_juice < beam_juice_max) {
@@ -263,7 +267,9 @@ switch(attack) {
                                 }
                         break;
 
+
                         // Phase 2 - Dash
+
                         case 3:
                                 if (window_timer == 1) {
                                         hsp = 8 * spr_dir;
@@ -304,13 +310,17 @@ switch(attack) {
                                 }
                         break;
 
+
                         // Phase 3 - Impact
+
                         case 4:
                                 if (window_timer == 1) {
                                         var rasen = create_hitbox(AT_NSPECIAL, 2, x + spr_dir * 32, y);
                                         rasen.proj_nspecial_charge = naruto_nspecial_charge;
                                         beam_newest_hbox = rasen;
+
                                         naruto_nspecial_charge = 0;
+
                                 }
                                 if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
                                         window = 5;
@@ -319,6 +329,7 @@ switch(attack) {
                         break;
 
                         // Phase 4 - Endlag
+
                         case 5:
                                 hsp = 0;
                                 vsp *= 0.9;
