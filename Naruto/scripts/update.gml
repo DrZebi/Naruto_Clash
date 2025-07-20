@@ -69,11 +69,92 @@ if (is_master_player) {
 		naruto_nspecial_sound = noone;
 	}
 	
-	// MunoPhone Touch code - don't touch
-	// should be at TOP of file
+        // MunoPhone Touch code - don't touch
+        // should be at TOP of file
 
+        // Rasengan dash and clash handling
+        if (state == PS_ATTACK_GROUND || state == PS_ATTACK_AIR) {
+                if (attack == AT_NSPECIAL) {
+                        var phone_window_end = get_window_value(attack, window, AG_WINDOW_LENGTH);
+                        switch (window) {
+                                case 1:
+                                        if (window_timer == 1) {
+                                                beam_juice = 60;
+                                                beam_juice_max = 60 * 8;
+                                                beam_length = 0;
+                                                hsp = clamp(hsp, -2, 2);
+                                                vsp = min(vsp, 3);
+                                                has_updated_beam_kb = false;
+                                                beam_clash_buddy = noone;
+                                                beam_clash_timer = 0;
+                                                beam_clash_timer_max = 120;
+                                                beam_angle = 0;
+                                        }
+                                        can_fast_fall = false;
+                                        break;
+                                case 2:
+                                        if (window_timer == 1) {
+                                                sound_play(sfx_dbfz_kame_charge, false, noone, 1, 1 + beam_juice * 0.001);
+                                        }
+                                        if (beam_juice > 180) {
+                                                shake_camera(floor((beam_juice - 180) / 30), 1);
+                                        }
+                                        if (special_down && beam_juice < beam_juice_max) {
+                                                beam_juice++;
+                                        } else {
+                                                window++;
+                                                window_timer = 0;
+                                                spawn_base_dust(x, y, "dash_start");
+                                        }
+                                        hsp = clamp(hsp, -2, 2);
+                                        vsp = min(vsp, 3);
+                                        can_fast_fall = false;
+                                        break;
+                                case 3:
+                                case 4:
+                                        if (beam_clash_buddy != noone) {
+                                                beam_clash_logic();
+                                        } else if (!hitpause) {
+                                                if (beam_juice > 0) {
+                                                        beam_length += 32;
+                                                        beam_juice -= 10;
+                                                }
+                                        }
+                                        spawn_nspecial_hitbox(1);
+                                        hsp = 0;
+                                        vsp = 0;
+                                        can_move = false;
+                                        can_fast_fall = false;
+                                        break;
+                                case 5:
+                                        if (beam_juice <= 0) {
+                                                window++;
+                                                window_timer = 0;
+                                                spawn_nspecial_hitbox(2);
+                                        }
+                                        spawn_nspecial_hitbox(1);
+                                        if (window_timer % 2) {
+                                                spawn_base_dust(x - 26 * spr_dir + sin(window_timer + 2) * 6 * spr_dir, y, "dash");
+                                        }
+                                        hsp = 0;
+                                        vsp = 0;
+                                        can_move = false;
+                                        can_fast_fall = false;
+                                        break;
+                                case 6:
+                                        if (beam_clash_buddy != noone) {
+                                                beam_clash_logic();
+                                        }
+                                        hsp = 0;
+                                        vsp = 0;
+                                        can_move = false;
+                                        can_fast_fall = false;
+                                        break;
+                        }
+                }
+        }
 
-	exit;
+        exit;
 }
 
 
@@ -168,3 +249,47 @@ return new_hit_fx;
 #define is_clone_active
 //returns true if a clone is currently active
 return ((attack != AT_EXTRA_3) || (state != PS_ATTACK_GROUND && state != PS_ATTACK_AIR));
+
+#define spawn_nspecial_hitbox(num)
+
+if hitpause && num == 1 return;
+
+attack_end();
+
+var x1 = 72;
+var y1 = -26 + lengthdir_y(32, beam_angle);
+
+switch((abs(lengthdir_y(1, beam_angle)) > abs(lengthdir_y(1, 15))) * sign(lengthdir_y(1, beam_angle))){
+        case 1:
+                x1 = 74;
+                y1 = -6;
+                break;
+        case -1:
+                x1 = 60;
+                y1 = -72;
+                break;
+}
+
+var cur_x = x1;
+var cur_y = y1;
+
+set_hitbox_value(attack, num, HG_WIDTH, 64 + 16 * has_hit);
+set_hitbox_value(attack, num, HG_HEIGHT, 64 + 16 * has_hit);
+
+var ld_x = lengthdir_x(32, beam_angle) * spr_dir;
+var ld_y = lengthdir_y(32, beam_angle);
+
+for (var i = 0; i * 32 < beam_length && i < 32 && cur_x == clamp(cur_x, -64, room_width + 64); i++) {
+        if (i % 3 == 0 || (i + 1) * 32 >= beam_length) {
+                if ((i + 1) * 32 >= beam_length) {
+                        set_hitbox_value(attack, num, HG_WIDTH, 64 + 64 * has_hit);
+                        set_hitbox_value(attack, num, HG_HEIGHT, 64 + 64 * has_hit);
+                }
+                beam_newest_hbox = create_hitbox(attack, num, round(x + cur_x * spr_dir), round(y + cur_y));
+                beam_newest_hbox.x_pos = round(cur_x * spr_dir);
+                beam_newest_hbox.y_pos = round(cur_y);
+        }
+        cur_x += ld_x;
+        cur_y += ld_y;
+}
+
