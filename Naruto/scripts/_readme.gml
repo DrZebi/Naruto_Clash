@@ -473,6 +473,3 @@ Compatibility --> Muno Character Compatibility
 
 
 
-
-// Rasengan dash and clash
-// Hold special to charge, release to dash forward. If your Rasengan collides with another beam, mash Special to win the clash.

@@ -62,6 +62,10 @@ sprite_change_offset("dstrong", 50, 70);
 sprite_change_offset("dstrong_hurt", 100, 140);
 sprite_change_offset("nspecial", 50, 70);
 sprite_change_offset("nspecial_hurt", 100, 140);
+sprite_change_offset("nspecial_beam_start", 50, 70);
+sprite_change_offset("nspecial_beam_end", 50, 70);
+sprite_change_offset("nspecial_beam_loop", 50, 70);
+sprite_change_offset("nspecial_beam_fade", 50, 70);
 sprite_change_offset("vfx_nspecial_fire", 50, 70);
 sprite_change_offset("vfx_ftilt_destroy", 50, 70); // actually for nspecial, not ftilt
 sprite_change_offset("fspecial", 50, 70);
