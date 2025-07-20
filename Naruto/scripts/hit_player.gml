@@ -55,29 +55,14 @@ case AT_FSPECIAL_2:
 break;
 
 case AT_NSPECIAL:
-	if (my_hitboxID.hit_priority == 1) break;
-	switch (my_hitboxID.hbox_num) {
-		case 1:
-			//when the initial projectile hits, spawn a multihit projectile.
-			if (has_hit) exit;
-			has_hit = true;
-			var rasen = create_hitbox(AT_NSPECIAL, 2, my_hitboxID.x, my_hitboxID.y);
-			rasen.spr_dir = my_hitboxID.spr_dir;
-			hit_player_obj.x += rasen.spr_dir * 10;
-			//pass on the charge strength of this projectile.
-			rasen.proj_nspecial_charge = my_hitboxID.proj_nspecial_charge;
-		//break;
-		case 2:
-			//multihit projectile: drag player towards projectile.
-			
-			
-			if (hit_player_obj.state_cat == SC_HITSTUN) {
-				hit_player_obj.x += round((my_hitboxID.x - hit_player_obj.x) * my_hitboxID.proj_magnet_strength);
-				var half_height = clamp(round(hit_player_obj.char_height / 2), 20, 50);
-				hit_player_obj.y += round(((my_hitboxID.y + half_height) - hit_player_obj.y) * my_hitboxID.proj_magnet_strength);
-			}
-		break;
-	}
-
-}
-
+        if (my_hitboxID.hit_priority == 1) break;
+        if (my_hitboxID.hbox_num == 2) {
+                var charge_dec = my_hitboxID.proj_nspecial_charge / player_id.c_naruto_nspecial_max_charge;
+                set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, lerp(7, 12, charge_dec));
+                set_hitbox_value(AT_NSPECIAL, 2, HG_KNOCKBACK_SCALING, lerp(0.5, 1.6, charge_dec));
+                set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_HITPAUSE, lerp(8, 20, charge_dec));
+                set_hitbox_value(AT_NSPECIAL, 2, HG_HITPAUSE_SCALING, lerp(0.5, 1.5, charge_dec));
+                set_hitbox_value(AT_NSPECIAL, 2, HG_DAMAGE, lerp(2, 22, charge_dec));
+                set_hitbox_value(AT_NSPECIAL, 2, HG_ANGLE, round(lerp(55, 35, charge_dec)));
+        }
+        break;
