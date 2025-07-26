@@ -67,16 +67,16 @@ case AT_NSPECIAL:
 			//pass on the charge strength of this projectile.
 			rasen.proj_nspecial_charge = my_hitboxID.proj_nspecial_charge;
 		//break;
-		case 2:
-			//multihit projectile: drag player towards projectile.
-			
-			
-			if (hit_player_obj.state_cat == SC_HITSTUN) {
-				hit_player_obj.x += round((my_hitboxID.x - hit_player_obj.x) * my_hitboxID.proj_magnet_strength);
-				var half_height = clamp(round(hit_player_obj.char_height / 2), 20, 50);
-				hit_player_obj.y += round(((my_hitboxID.y + half_height) - hit_player_obj.y) * my_hitboxID.proj_magnet_strength);
-			}
-		break;
+                case 2:
+                        // multihit projectile: drag player towards projectile.
+                        if (hit_player_obj.state_cat == SC_HITSTUN) {
+                                hit_player_obj.x += round((my_hitboxID.x - hit_player_obj.x) * my_hitboxID.proj_magnet_strength);
+                                var half_height = clamp(round(hit_player_obj.char_height / 2), 20, 50);
+                                hit_player_obj.y += round(((my_hitboxID.y + half_height) - hit_player_obj.y) * my_hitboxID.proj_magnet_strength);
+                        }
+                        rasengan_hit_count += 1;
+                        my_hitboxID.damage = 1 + floor(rasengan_hit_count * 0.5);
+                break;
 	}
 
 }
