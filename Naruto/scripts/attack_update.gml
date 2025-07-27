@@ -235,309 +235,84 @@ switch(attack) {
 	break;
 	
         case AT_NSPECIAL:
-                // simplified rasengan dash special
+                // Rasengan charge and dash special
                 can_move = false;
                 switch (window) {
                         case 1:
                                 if (window_timer == 1) {
-                                        rasengan_charge = 0;
-                                        beam_juice = 0;
-                                        rasengan_hit_count = 0;
-                                        rasengan_max_hits = 0;
+                                        beam_juice = 60;
+                                        beam_juice_max = 60 * 8;
+                                        beam_length = 0;
+                                        beam_clash_buddy = noone;
+                                        beam_clash_timer = 0;
+                                        beam_clash_timer_max = 120;
                                         has_hit_player = false;
                                 }
-                                doing_naruto_rasengan = false;
-                        break;
-                        case 2:
-                                vsp = min(vsp, 4);
-                                if (special_down && rasengan_charge < rasengan_charge_max) {
-                                        rasengan_charge++;
-                                        beam_juice = min(beam_juice + 1, beam_juice_max);
-                                } else {
-                                        rasengan_max_hits = 2 + floor(rasengan_charge / 15);
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                                doing_naruto_rasengan = false;
-                        break;
-                        case 3:
-                                if (window_timer == 1) {
-                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                        create_hitbox(AT_NSPECIAL, 1, x, y);
-                                }
+                                can_fast_fall = false;
                                 doing_naruto_rasengan = true;
-                                beam_juice = max(beam_juice - 1, 0);
-                                if (has_hit_player || !special_down || beam_juice <= 0) {
-                                        destroy_hitboxes();
-                                        window = 4;
-                                        window_timer = 0;
-                                        hsp = 0;
-                                }
                         break;
-                        case 4:
-                                if (window_timer == 1) {
-                                        create_hitbox(AT_NSPECIAL, 2, x, y);
-                                        spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
-                                        hsp = 0;
-                                }
-                                doing_naruto_rasengan = true;
-                                if (is_end_of_window()) {
-                                        window = 5;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 5:
-                                // endlag
-                                doing_naruto_rasengan = false;
-                        break;
-                        default:
-                                doing_naruto_rasengan = false;
-                        break;
-                }
-        break;
-        case AT_NSPECIAL:
-                // simplified rasengan dash special
-                doing_naruto_rasengan = true;
-                can_move = false;
-                switch (window) {
-                        case 1:
-                                if (window_timer == 1) {
-                                        rasengan_charge = 0;
-                                        beam_juice = 0;
-                                        rasengan_hit_count = 0;
-                                        rasengan_max_hits = 0;
-                                        has_hit_player = false;
-                                }
-                        break;
-                        case 2:
+                        case 2: // charge loop
                                 vsp = min(vsp, 4);
-                                if (special_down && rasengan_charge < rasengan_charge_max) {
-                                        rasengan_charge++;
-                                        beam_juice = min(beam_juice + 1, beam_juice_max);
+                                if (special_down && beam_juice < beam_juice_max) {
+                                        beam_juice++;
                                 } else {
-                                        rasengan_max_hits = 2 + floor(rasengan_charge / 15);
                                         window = 3;
                                         window_timer = 0;
                                 }
+                                can_fast_fall = false;
                         break;
-                        case 3:
+                        case 3: // post-charge
                                 if (window_timer == 1) {
-                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                        create_hitbox(AT_NSPECIAL, 1, x, y);
+                                        beam_length = min(320, 32 + (beam_juice div 30) * 16);
+                                        var dash_time = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH);
+                                        hsp = (beam_length / dash_time) * spr_dir;
+                                        set_window_value(AT_NSPECIAL, 6, AG_WINDOW_LENGTH, 16 + floor(ease_sineIn(0,30, beam_juice, beam_juice_max)));
                                 }
-                                beam_juice = max(beam_juice - 1, 0);
-                                if (has_hit_player || !special_down || beam_juice <= 0) {
-                                        destroy_hitboxes();
-                                        window = 4;
+                                can_fast_fall = false;
+                        break;
+                        case 4: // dash
+                                create_hitbox(AT_NSPECIAL, 1, x + hsp * window_timer, y);
+                                if (beam_clash_buddy != noone) {
+                                        beam_clash_logic();
+                                } else {
+                                        var me = self;
+                                        with oPlayer if doing_goku_beam || doing_naruto_rasengan {
+                                                if instance_exists(me.beam_newest_hbox) && distance_to_object(me.beam_newest_hbox) < 64 {
+                                                        me.beam_clash_buddy = id;
+                                                        beam_clash_buddy = me;
+                                                        sound_play(sfx_dbfz_hit_broken);
+                                                }
+                                        }
+                                }
+                                if (is_end_of_window()) {
+                                        window = 5;
                                         window_timer = 0;
-                                        hsp = 0;
+                                        destroy_hitboxes();
                                 }
+                                can_fast_fall = false;
                         break;
-                        case 4:
+                        case 5: // final hit
                                 if (window_timer == 1) {
+                                        var dmg = 4 + floor(beam_juice / 60);
+                                        var kb = 8 + floor(beam_juice / 60) * 2;
+                                        set_hitbox_value(AT_NSPECIAL, 2, HG_DAMAGE, dmg);
+                                        set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, kb);
                                         create_hitbox(AT_NSPECIAL, 2, x, y);
                                         spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
                                         hsp = 0;
                                 }
                                 if (is_end_of_window()) {
-                                        window = 5;
+                                        window = 6;
                                         window_timer = 0;
                                 }
+                                can_fast_fall = false;
                         break;
-                        case 5:
-                                // endlag
+                        case 6: // endlag
+                                doing_naruto_rasengan = false;
                         break;
                         default:
                                 doing_naruto_rasengan = false;
                         break;
-                }
-        break;
-        case AT_NSPECIAL:
-                // simplified rasengan dash special
-                doing_naruto_rasengan = true;
-                can_move = false;
-                switch (window) {
-                        case 1:
-                                if (window_timer == 1) {
-                                        rasengan_charge = 0;
-                                        beam_juice = 0;
-                                        rasengan_hit_count = 0;
-                                        rasengan_max_hits = 0;
-                                        has_hit_player = false;
-                                }
-                        break;
-                        case 2:
-                                vsp = min(vsp, 4);
-                                if (special_down && rasengan_charge < rasengan_charge_max) {
-                                        rasengan_charge++;
-                                        beam_juice = min(beam_juice + 1, beam_juice_max);
-                                } else {
-                                        rasengan_max_hits = 2 + floor(rasengan_charge / 15);
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 3:
-                                if (window_timer == 1) {
-                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                }
-                                beam_juice = max(beam_juice - 1, 0);
-                                if (!has_hit_player && window_timer % 4 == 1 && rasengan_hit_count < rasengan_max_hits) {
-                                        create_hitbox(AT_NSPECIAL, 1, x, y);
-                                }
-                                if (has_hit_player) {
-                                        destroy_hitboxes();
-                                        window = 4;
-                                        window_timer = 0;
-                                        hsp = 0;
-                                } else if (!special_down || beam_juice <= 0) {
-                                        destroy_hitboxes();
-                                        window = 4;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 4:
-                                if (window_timer == 1) {
-                                        create_hitbox(AT_NSPECIAL, 2, x, y);
-                                        spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
-                                        hsp = 0;
-                                }
-                                if (is_end_of_window()) {
-                                        window = 5;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 5:
-                                // endlag
-                        break;
-                        default:
-                                doing_naruto_rasengan = false;
-                        break;
-                }
-        break;
-        case AT_NSPECIAL:
-                // simplified rasengan dash special
-                doing_naruto_rasengan = true;
-                can_move = false;
-                switch (window) {
-                        case 1:
-                                if (window_timer == 1) {
-                                        rasengan_charge = 0;
-                                        beam_juice = 0;
-                                        rasengan_hit_count = 0;
-                                        rasengan_max_hits = 0;
-                                        has_hit_player = false;
-                                }
-                        break;
-                        case 2:
-                                vsp = min(vsp, 4);
-                                if (special_down && rasengan_charge < rasengan_charge_max) {
-                                        rasengan_charge++;
-                                        beam_juice = min(beam_juice + 1, beam_juice_max);
-                                } else {
-                                        rasengan_max_hits = 2 + floor(rasengan_charge / 15);
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 3:
-                                if (window_timer == 1) {
-                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                }
-                                beam_juice = max(beam_juice - 1, 0);
-                                if (window_timer % 4 == 1 && rasengan_hit_count < rasengan_max_hits) {
-                                        create_hitbox(AT_NSPECIAL, 1, x, y);
-                                }
-                                if (has_hit_player && rasengan_hit_count >= rasengan_max_hits) {
-                                        destroy_hitboxes();
-                                        window = 4;
-                                        window_timer = 0;
-                                        hsp = 0;
-                                }
-                                if (!special_down || beam_juice <= 0) {
-                                        destroy_hitboxes();
-                                        window = 4;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 4:
-                                if (window_timer == 1) {
-                                        create_hitbox(AT_NSPECIAL, 2, x, y);
-                                        spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
-                                        hsp = 0;
-                                }
-                                if (is_end_of_window()) {
-                                        window = 5;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 5:
-                                // endlag
-                        break;
-                        default:
-                                doing_naruto_rasengan = false;
-                        break;
-                }
-        break;
-        case AT_NSPECIAL:
-                // simplified rasengan dash special
-                doing_naruto_rasengan = true;
-                can_move = false;
-                switch (window) {
-                        case 1:
-                                rasengan_charge = 0;
-                                beam_juice = 0;
-
-                                rasengan_hit_count = 0;
-
-                        break;
-                        case 2:
-                                vsp = min(vsp, 4);
-                                if (special_down && rasengan_charge < rasengan_charge_max) {
-                                        rasengan_charge++;
-                                        beam_juice = min(beam_juice + 1, beam_juice_max);
-                                } else {
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 3:
-                                if (window_timer == 1) {
-                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                }
-
-                                if (has_hit_player) {
-                                        hsp = 0;
-                                }
-
-                                if (window_timer > 4) {
-                                        window = 4;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 4:
-                                hsp = spr_dir * (4 + rasengan_charge * 0.1);
-                                beam_juice = max(beam_juice - 1, 0);
-
-                                if (has_hit_player) {
-                                        hsp = 0;
-                                }
-
-                                if (!special_down || beam_juice <= 0) {
-                                        window = 5;
-                                        window_timer = 0;
-                                }
-                        break;
-                        case 5:
-                                // finisher window
-                        break;
-                        default:
-                                doing_naruto_rasengan = false;
-                        break;
-                }
-        break;
-	break;
-	
 	case AT_NSPECIAL_2:
 		//'clone' part of nspecial.
 		var master_is_using_nspecial;
@@ -1278,7 +1053,7 @@ with (oPlayer) {
 
 #define beam_clash_logic
 
-if !beam_clash_buddy.doing_goku_beam{
+if !beam_clash_buddy.doing_goku_beam && !beam_clash_buddy.doing_naruto_rasengan{
 	beam_clash_buddy.beam_clash_buddy = noone;
 	beam_clash_buddy = noone;
 }
