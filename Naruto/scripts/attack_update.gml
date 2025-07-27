@@ -234,152 +234,67 @@ switch(attack) {
 	
 	break;
 	
-	case AT_NSPECIAL:
-		//rasengan
-		
-		
-		
-		can_move = false;
-		//slow down movement if in the air
-		if (free) hsp *= 0.99;
-		
-		switch (window) {
-			
-			case 2: //startup
-				if (window_timer != 1) break;
-				//if at full charge, skip this window
-				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
-				//	window++;
-				//	window_timer = 0;
-				//	break;
-				//}
-				
-				//if a clone is nearby, use that clone instead of summoning a new one.
-				naruto_spawned_clone_reference = get_nearest_clone(c_naruto_clone_teamup_max_distance);
-				if (naruto_spawned_clone_reference != noone) {
-					//if a clone was found, set this clone's attack to AT_NSPECIAL_2.
-					clone_teamup_effect();
-					with (naruto_spawned_clone_reference) {
-						safely_set_attack(AT_NSPECIAL_2);
-						//skip startup window.
-						window++;
-						window_timer = 0;
-					}
-				}
-				else {
-					//if no clone was found, spawn a new clone, with the default startup time.
-					naruto_spawned_clone_reference = spawn_clone(x - spr_dir * 30, y);
-					if instance_exists(naruto_spawned_clone_reference) {
-						with (naruto_spawned_clone_reference) { safely_set_attack(AT_NSPECIAL_2);  }
-						spawn_hit_fx_2x(naruto_spawned_clone_reference.x, y, vfx_clone_smoke).depth = depth-1;
-					}
-				}
-			break;
-			
-			case 3: //wait for clone
-				//cycle this window until the clone is ready to help charge.
-				//skip ahead if this move is at max charge.
-				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge && !special_down) {
-				//	window += 3;
-				//	window_timer = 0;
-				//	break;
-				//}
-				
-				//cancel this attack if the clone has gone away, or isn't using the right attack
-				if (!clone_exists_and_is_using_attack(naruto_spawned_clone_reference, AT_NSPECIAL_2)) {
-					window = 9;
-					window_timer = 0;
-					break;
-				}
-				//when the clone reaches window 3 of at_nspecial_2, transition the player to the next window of at_nspecial.
-				if (naruto_spawned_clone_reference.window >= 3) {
-					window++;
-					window_timer = 0;
-					//clear the relevant button buffers, so that you can't cancel the attack -before- the charge window starts.
-					//clear_button_buffer(PC_LEFT_HARD_PRESSED);
-					//clear_button_buffer(PC_RIGHT_HARD_PRESSED);
-					clear_button_buffer(PC_SHIELD_PRESSED);
-					
-				}
-			break;
-			
-			case 5: //charge window
-				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-				
-				//cancel this attack with a hard left/right press, or with the shield button
-				//var hard_press_dir = left_hard_pressed - right_hard_pressed;
-				//if (left_hard_pressed - right_hard_pressed != 0 || shield_pressed || jump_pressed) {
-				
-				//cancel this attack with a dodge.
-				if (shield_pressed) {
-					
-					print("shield pressed")
-					if (!free) {
-						//on the ground: cancel into a roll.
-						//clear_button_buffer(PC_SHIELD_PRESSED);
-						
-						switch ((right_down - left_down) * spr_dir) {
-							
-							case 1: 
-								set_state(PS_ROLL_FORWARD);
-							break;
-							case -1: 
-								
-								set_state(PS_ROLL_BACKWARD);
-							break;
-							default:
-								window = 9;
-								window_timer = 0;
-							break;
-						}
-					}
-					else {
-						//in the air: cancel into an airdodge if possible.
-						if (has_airdodge) {
-							has_airdodge = 0;
-							set_state(PS_AIR_DODGE);
-							//clear_button_buffer(PC_SHIELD_PRESSED);
-						}
-						//if no airdodge, cancel into nspecial's recovery.
-						else {
-							window = 9;
-							window_timer = 0;
-						}
-					}
-				}
-
-				//stop charging if the special button is not held
-				else if (!special_down) {
-					window++;
-					window_timer = 0;
-					break;
-				}
-				
-				//charging sfx
-				if (naruto_nspecial_charge == 1 && naruto_nspecial_charge != c_naruto_nspecial_max_charge) {
-					voice_play(VB_RASENGAN_CHARGING);
-					naruto_nspecial_sound = sound_play(sound_get("snd_rasenganstartcharge"), 0, noone, 0.8, 1)
-				}
-				
-				//charge up
-				var check_full_charge = (naruto_nspecial_charge >= c_naruto_nspecial_max_charge);
-				naruto_nspecial_charge = min(naruto_nspecial_charge + 1, c_naruto_nspecial_max_charge);
-				if (!check_full_charge && naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
-					voice_play(VB_RASENGAN_FULLCHARGE);
-				}
-			break;
-			
-			case 6:
-				//limit fall speed
-				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-				
-				//play voice sfx at end of window
-				if (!is_end_of_window()) break;
-				if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) voice_play(VB_RASENGAN_MAX);
-				else voice_play(VB_RASENGAN);
-			break;
-			
-		}
+        case AT_NSPECIAL:
+                // simplified rasengan dash special
+                can_move = false;
+                switch (window) {
+                        case 1:
+                                if (window_timer == 1) {
+                                        rasengan_charge = 0;
+                                        beam_juice = 0;
+                                        rasengan_hit_count = 0;
+                                        rasengan_max_hits = 0;
+                                        has_hit_player = false;
+                                }
+                                doing_naruto_rasengan = false;
+                        break;
+                        case 2:
+                                vsp = min(vsp, 4);
+                                if (special_down && rasengan_charge < rasengan_charge_max) {
+                                        rasengan_charge++;
+                                        beam_juice = min(beam_juice + 1, beam_juice_max);
+                                } else {
+                                        rasengan_max_hits = 2 + floor(rasengan_charge / 15);
+                                        window = 3;
+                                        window_timer = 0;
+                                }
+                                doing_naruto_rasengan = false;
+                        break;
+                        case 3:
+                                if (window_timer == 1) {
+                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
+                                        create_hitbox(AT_NSPECIAL, 1, x, y);
+                                }
+                                doing_naruto_rasengan = true;
+                                beam_juice = max(beam_juice - 1, 0);
+                                if (has_hit_player || !special_down || beam_juice <= 0) {
+                                        destroy_hitboxes();
+                                        window = 4;
+                                        window_timer = 0;
+                                        hsp = 0;
+                                }
+                        break;
+                        case 4:
+                                if (window_timer == 1) {
+                                        create_hitbox(AT_NSPECIAL, 2, x, y);
+                                        spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
+                                        hsp = 0;
+                                }
+                                doing_naruto_rasengan = true;
+                                if (is_end_of_window()) {
+                                        window = 5;
+                                        window_timer = 0;
+                                }
+                        break;
+                        case 5:
+                                // endlag
+                                doing_naruto_rasengan = false;
+                        break;
+                        default:
+                                doing_naruto_rasengan = false;
+                        break;
+                }
+        break;
 	break;
 	
 	case AT_NSPECIAL_2:
