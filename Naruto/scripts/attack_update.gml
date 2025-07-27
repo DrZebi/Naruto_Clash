@@ -238,6 +238,22 @@ switch(attack) {
                 // Rasengan charge and dash special
                 can_move = false;
                 switch (window) {
+                        case 1: // startup
+                                if (window_timer == 1) {
+                                        beam_juice       = 60;
+                                        beam_juice_max   = 60 * 8;
+                                        beam_length      = 0;
+                                        beam_dash_speed  = 0;
+                                        beam_clash_buddy = noone;
+                                        beam_clash_timer = 0;
+                                        beam_clash_timer_max = 120;
+                                        has_hit_player   = false;
+                                        hsp = clamp(hsp, -2, 2);
+                                        vsp = min(vsp, 3);
+                                }
+                                can_fast_fall = false;
+                                doing_naruto_rasengan = true;
+                                break;
                         case 1:
                                 if (window_timer == 1) {
                                         beam_juice = 60;
@@ -260,6 +276,21 @@ switch(attack) {
                                         window_timer = 0;
                                 }
                                 can_fast_fall = false;
+                                break;
+                        case 3: // post-charge
+                                if (window_timer == 1) {
+                                        beam_length = clamp(64 + ((beam_juice - 60) div 30) * 16, 64, 320);
+                                        var dash_frames = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH) + get_window_value(AT_NSPECIAL, 5, AG_WINDOW_LENGTH);
+                                        beam_dash_speed = beam_length / dash_frames;
+                                        set_window_value(AT_NSPECIAL, 7, AG_WINDOW_LENGTH, clamp(floor(beam_juice / 30), 0, 6) + 6);
+                                }
+                                hsp = 0;
+                                can_fast_fall = false;
+                                window = 4;
+                                window_timer = 0;
+                                break;
+                        case 4: // dash start
+                                hsp = beam_dash_speed * spr_dir;
                         break;
                         case 3: // post-charge
                                 if (window_timer == 1) {
@@ -285,11 +316,31 @@ switch(attack) {
                                         }
                                 }
                                 if (is_end_of_window()) {
+                                        window++;
+                                        window_timer = 0;
+                                }
+                                can_fast_fall = false;
+                                break;
+                        case 5: // dash active
+                                hsp = beam_dash_speed * spr_dir;
+                                create_hitbox(AT_NSPECIAL, 1, x + hsp * window_timer, y);
+                                if (beam_clash_buddy != noone) {
+                                        beam_clash_logic();
+                                }
+                                if (is_end_of_window()) {
+                                        window = 6;
                                         window = 5;
                                         window_timer = 0;
                                         destroy_hitboxes();
                                 }
                                 can_fast_fall = false;
+                                break;
+                        case 6: // final hit
+                                hsp = 0;
+                                if (window_timer == 1) {
+                                        var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
+                                        var dmg = 2 + round(charge_level * 4);
+                                        var kb  = 8 + round(charge_level * 8);
                         break;
                         case 5: // final hit
                                 if (window_timer == 1) {
@@ -299,6 +350,28 @@ switch(attack) {
                                         set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, kb);
                                         create_hitbox(AT_NSPECIAL, 2, x, y);
                                         spawn_hit_fx(x, y - 36, vfx_nspecial_fire);
+                                }
+                                if (is_end_of_window()) {
+                                        window = 7;
+                                        window_timer = 0;
+                                }
+                                can_fast_fall = false;
+                                break;
+                        case 7: // endlag
+                                hsp = 0;
+                                if (is_end_of_window()) {
+                                        window = 8;
+                                        window_timer = 0;
+                                }
+                                can_fast_fall = false;
+                                break;
+                        case 8: // endlag pt2
+                                hsp = 0;
+                                doing_naruto_rasengan = false;
+                                break;
+                        default:
+                                doing_naruto_rasengan = false;
+                                break;
                                         hsp = 0;
                                 }
                                 if (is_end_of_window()) {
