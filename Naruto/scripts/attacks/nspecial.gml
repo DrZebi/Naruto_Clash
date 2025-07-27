@@ -1,6 +1,7 @@
 set_attack_value(AT_NSPECIAL, AG_CATEGORY, 2);
 set_attack_value(AT_NSPECIAL, AG_SPRITE, sprite_get("nspecial"));
 set_attack_value(AT_NSPECIAL, AG_NUM_WINDOWS, 7);
+set_attack_value(AT_NSPECIAL, AG_NUM_WINDOWS, 8);
 set_attack_value(AT_NSPECIAL, AG_HAS_LANDING_LAG, 4);
 set_attack_value(AT_NSPECIAL, AG_OFF_LEDGE, 1);
 set_attack_value(AT_NSPECIAL, AG_AIR_SPRITE, sprite_get("nspecial_air"));
@@ -47,6 +48,7 @@ set_num_hitboxes(AT_NSPECIAL, 2);
 set_hitbox_value(AT_NSPECIAL, 1, HG_HITBOX_TYPE, 1);
 set_hitbox_value(AT_NSPECIAL, 1, HG_WINDOW, 4);
 set_hitbox_value(AT_NSPECIAL, 1, HG_LIFETIME, 12);
+set_hitbox_value(AT_NSPECIAL, 1, HG_LIFETIME, 1);
 set_hitbox_value(AT_NSPECIAL, 1, HG_WIDTH, 80);
 set_hitbox_value(AT_NSPECIAL, 1, HG_HEIGHT, 80);
 set_hitbox_value(AT_NSPECIAL, 1, HG_SHAPE, 2);
