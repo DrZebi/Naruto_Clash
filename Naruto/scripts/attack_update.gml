@@ -254,6 +254,19 @@ switch(attack) {
                                 can_fast_fall = false;
                                 doing_naruto_rasengan = true;
                                 break;
+                        case 1:
+                                if (window_timer == 1) {
+                                        beam_juice = 60;
+                                        beam_juice_max = 60 * 8;
+                                        beam_length = 0;
+                                        beam_clash_buddy = noone;
+                                        beam_clash_timer = 0;
+                                        beam_clash_timer_max = 120;
+                                        has_hit_player = false;
+                                }
+                                can_fast_fall = false;
+                                doing_naruto_rasengan = true;
+                        break;
                         case 2: // charge loop
                                 vsp = min(vsp, 4);
                                 if (special_down && beam_juice < beam_juice_max) {
@@ -278,6 +291,17 @@ switch(attack) {
                                 break;
                         case 4: // dash start
                                 hsp = beam_dash_speed * spr_dir;
+                        break;
+                        case 3: // post-charge
+                                if (window_timer == 1) {
+                                        beam_length = min(320, 32 + (beam_juice div 30) * 16);
+                                        var dash_time = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH);
+                                        hsp = (beam_length / dash_time) * spr_dir;
+                                        set_window_value(AT_NSPECIAL, 6, AG_WINDOW_LENGTH, 16 + floor(ease_sineIn(0,30, beam_juice, beam_juice_max)));
+                                }
+                                can_fast_fall = false;
+                        break;
+                        case 4: // dash
                                 create_hitbox(AT_NSPECIAL, 1, x + hsp * window_timer, y);
                                 if (beam_clash_buddy != noone) {
                                         beam_clash_logic();
@@ -305,6 +329,7 @@ switch(attack) {
                                 }
                                 if (is_end_of_window()) {
                                         window = 6;
+                                        window = 5;
                                         window_timer = 0;
                                         destroy_hitboxes();
                                 }
@@ -316,6 +341,11 @@ switch(attack) {
                                         var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
                                         var dmg = 2 + round(charge_level * 4);
                                         var kb  = 8 + round(charge_level * 8);
+                        break;
+                        case 5: // final hit
+                                if (window_timer == 1) {
+                                        var dmg = 4 + floor(beam_juice / 60);
+                                        var kb = 8 + floor(beam_juice / 60) * 2;
                                         set_hitbox_value(AT_NSPECIAL, 2, HG_DAMAGE, dmg);
                                         set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, kb);
                                         create_hitbox(AT_NSPECIAL, 2, x, y);
@@ -342,6 +372,20 @@ switch(attack) {
                         default:
                                 doing_naruto_rasengan = false;
                                 break;
+                                        hsp = 0;
+                                }
+                                if (is_end_of_window()) {
+                                        window = 6;
+                                        window_timer = 0;
+                                }
+                                can_fast_fall = false;
+                        break;
+                        case 6: // endlag
+                                doing_naruto_rasengan = false;
+                        break;
+                        default:
+                                doing_naruto_rasengan = false;
+                        break;
 	case AT_NSPECIAL_2:
 		//'clone' part of nspecial.
 		var master_is_using_nspecial;
