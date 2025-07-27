@@ -106,6 +106,35 @@ if (!custom_clone) {
     rasengan_charge_max = 60;
     rasengan_hit_count = 0;
     rasengan_max_hits = 0;
+    naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
+
+    //rasengan / beam variables
+    beam_juice = 0;
+    beam_juice_max = 100;
+    beam_length = 0;
+    beam_clash_buddy = noone;
+    beam_clash_timer = 0;
+    beam_clash_timer_max = 180;
+    doing_naruto_rasengan = false;
+    rasengan_charge = 0;
+    rasengan_charge_max = 60;
+    rasengan_hit_count = 0;
+    rasengan_max_hits = 0;
+    naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
+
+    //rasengan / beam variables
+    beam_juice = 0;
+    beam_juice_max = 100;
+    beam_length = 0;
+    beam_clash_buddy = noone;
+    beam_clash_timer = 0;
+    beam_clash_timer_max = 180;
+    doing_naruto_rasengan = false;
+    rasengan_charge = 0;
+    rasengan_charge_max = 60;
+    rasengan_hit_count = 0;
+    rasengan_max_hits = 0;
+
     
     //move index constants. 
     //each clone needs their own index for certain moves.
