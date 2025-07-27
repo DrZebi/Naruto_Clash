@@ -80,6 +80,7 @@ set_num_hitboxes(AT_NSPECIAL, 2);
 
 set_hitbox_value(AT_NSPECIAL, 1, HG_HITBOX_TYPE, 1);
 set_hitbox_value(AT_NSPECIAL, 1, HG_WINDOW, 3);
+set_hitbox_value(AT_NSPECIAL, 1, HG_LIFETIME, 9999999); // active through the entire dash
 set_hitbox_value(AT_NSPECIAL, 1, HG_LIFETIME, 12);
 set_hitbox_value(AT_NSPECIAL, 1, HG_WINDOW, 4);
 set_hitbox_value(AT_NSPECIAL, 1, HG_LIFETIME, 12);
@@ -94,6 +95,8 @@ set_hitbox_value(AT_NSPECIAL, 1, HG_BASE_KNOCKBACK, 1);
 set_hitbox_value(AT_NSPECIAL, 1, HG_KNOCKBACK_SCALING, 0);
 set_hitbox_value(AT_NSPECIAL, 1, HG_BASE_HITPAUSE, 3);
 set_hitbox_value(AT_NSPECIAL, 1, HG_HITPAUSE_SCALING, 0);
+set_hitbox_value(AT_NSPECIAL, 1, HG_HITBOX_X, 40);
+set_hitbox_value(AT_NSPECIAL, 1, HG_HITBOX_Y, -40);
 set_hitbox_value(AT_NSPECIAL, 1, HG_SDI_MULTIPLIER, 0.00001);
 set_hitbox_value(AT_NSPECIAL, 1, HG_HIT_SFX, asset_get("sfx_blow_medium2"));
 set_hitbox_value(AT_NSPECIAL, 1, HG_EXTENDED_PARRY_STUN, 1);
@@ -113,6 +116,8 @@ set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, 8);
 set_hitbox_value(AT_NSPECIAL, 2, HG_KNOCKBACK_SCALING, 0.9);
 set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_HITPAUSE, 9);
 set_hitbox_value(AT_NSPECIAL, 2, HG_HITPAUSE_SCALING, 0.5);
+set_hitbox_value(AT_NSPECIAL, 2, HG_HITBOX_X, 40);
+set_hitbox_value(AT_NSPECIAL, 2, HG_HITBOX_Y, -40);
 set_hitbox_value(AT_NSPECIAL, 2, HG_VISUAL_EFFECT, 304);
 set_hitbox_value(AT_NSPECIAL, 2, HG_HIT_LOCKOUT, 5);
 set_hitbox_value(AT_NSPECIAL, 2, HG_HIT_SFX, asset_get("sfx_blow_medium2"));
