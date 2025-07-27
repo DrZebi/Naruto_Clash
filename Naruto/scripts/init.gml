@@ -96,11 +96,12 @@ if (!custom_clone) {
 
     //rasengan / beam variables
     beam_juice = 0;
-    beam_juice_max = 100;
+    beam_juice_max = 60 * 8;
     beam_length = 0;
+    beam_dash_speed = 0;
     beam_clash_buddy = noone;
     beam_clash_timer = 0;
-    beam_clash_timer_max = 180;
+    beam_clash_timer_max = 120;
     doing_naruto_rasengan = false;
     rasengan_charge = 0;
     rasengan_charge_max = 60;
@@ -110,11 +111,12 @@ if (!custom_clone) {
 
     //rasengan / beam variables
     beam_juice = 0;
-    beam_juice_max = 100;
+    beam_juice_max = 60 * 8;
     beam_length = 0;
+    beam_dash_speed = 0;
     beam_clash_buddy = noone;
     beam_clash_timer = 0;
-    beam_clash_timer_max = 180;
+    beam_clash_timer_max = 120;
     doing_naruto_rasengan = false;
     rasengan_charge = 0;
     rasengan_charge_max = 60;
@@ -124,11 +126,12 @@ if (!custom_clone) {
 
     //rasengan / beam variables
     beam_juice = 0;
-    beam_juice_max = 100;
+    beam_juice_max = 60 * 8;
     beam_length = 0;
+    beam_dash_speed = 0;
     beam_clash_buddy = noone;
     beam_clash_timer = 0;
-    beam_clash_timer_max = 180;
+    beam_clash_timer_max = 120;
     doing_naruto_rasengan = false;
     rasengan_charge = 0;
     rasengan_charge_max = 60;
@@ -138,11 +141,12 @@ if (!custom_clone) {
 
     //rasengan / beam variables
     beam_juice = 0;
-    beam_juice_max = 100;
+    beam_juice_max = 60 * 8;
     beam_length = 0;
+    beam_dash_speed = 0;
     beam_clash_buddy = noone;
     beam_clash_timer = 0;
-    beam_clash_timer_max = 180;
+    beam_clash_timer_max = 120;
     doing_naruto_rasengan = false;
     rasengan_charge = 0;
     rasengan_charge_max = 60;
