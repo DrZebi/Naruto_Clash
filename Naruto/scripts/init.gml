@@ -106,6 +106,7 @@ if (!custom_clone) {
     rasengan_charge_max = 60;
     rasengan_hit_count = 0;
     rasengan_max_hits = 0;
+
     
     //move index constants. 
     //each clone needs their own index for certain moves.

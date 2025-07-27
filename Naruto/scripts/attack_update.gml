@@ -298,6 +298,63 @@ switch(attack) {
                         break;
                 }
         break;
+        case AT_NSPECIAL:
+                // simplified rasengan dash special
+                doing_naruto_rasengan = true;
+                can_move = false;
+                switch (window) {
+                        case 1:
+                                rasengan_charge = 0;
+                                beam_juice = 0;
+
+                                rasengan_hit_count = 0;
+
+                        break;
+                        case 2:
+                                vsp = min(vsp, 4);
+                                if (special_down && rasengan_charge < rasengan_charge_max) {
+                                        rasengan_charge++;
+                                        beam_juice = min(beam_juice + 1, beam_juice_max);
+                                } else {
+                                        window = 3;
+                                        window_timer = 0;
+                                }
+                        break;
+                        case 3:
+                                if (window_timer == 1) {
+                                        hsp = spr_dir * (4 + rasengan_charge * 0.1);
+                                }
+
+                                if (has_hit_player) {
+                                        hsp = 0;
+                                }
+
+                                if (window_timer > 4) {
+                                        window = 4;
+                                        window_timer = 0;
+                                }
+                        break;
+                        case 4:
+                                hsp = spr_dir * (4 + rasengan_charge * 0.1);
+                                beam_juice = max(beam_juice - 1, 0);
+
+                                if (has_hit_player) {
+                                        hsp = 0;
+                                }
+
+                                if (!special_down || beam_juice <= 0) {
+                                        window = 5;
+                                        window_timer = 0;
+                                }
+                        break;
+                        case 5:
+                                // finisher window
+                        break;
+                        default:
+                                doing_naruto_rasengan = false;
+                        break;
+                }
+        break;
 	break;
 	
 	case AT_NSPECIAL_2:
