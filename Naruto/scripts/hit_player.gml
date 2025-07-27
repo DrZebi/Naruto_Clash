@@ -57,6 +57,8 @@ break;
 case AT_NSPECIAL:
         if (doing_naruto_rasengan) {
                 has_hit_player = true;
+                rasengan_hit_count += 1;
+                my_hitboxID.damage = 1 + floor(rasengan_hit_count * 0.5);
                 break;
         }
         if (my_hitboxID.hit_priority == 1) break;
