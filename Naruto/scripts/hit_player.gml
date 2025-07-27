@@ -55,7 +55,11 @@ case AT_FSPECIAL_2:
 break;
 
 case AT_NSPECIAL:
-	if (my_hitboxID.hit_priority == 1) break;
+        if (doing_naruto_rasengan) {
+                has_hit_player = true;
+                break;
+        }
+        if (my_hitboxID.hit_priority == 1) break;
 	switch (my_hitboxID.hbox_num) {
 		case 1:
 			//when the initial projectile hits, spawn a multihit projectile.

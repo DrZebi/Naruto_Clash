@@ -242,6 +242,9 @@ switch(attack) {
                         case 1:
                                 rasengan_charge = 0;
                                 beam_juice = 0;
+
+                                rasengan_hit_count = 0;
+
                         break;
                         case 2:
                                 vsp = min(vsp, 4);
@@ -257,6 +260,11 @@ switch(attack) {
                                 if (window_timer == 1) {
                                         hsp = spr_dir * (4 + rasengan_charge * 0.1);
                                 }
+
+                                if (has_hit_player) {
+                                        hsp = 0;
+                                }
+
                                 if (window_timer > 4) {
                                         window = 4;
                                         window_timer = 0;
@@ -265,6 +273,11 @@ switch(attack) {
                         case 4:
                                 hsp = spr_dir * (4 + rasengan_charge * 0.1);
                                 beam_juice = max(beam_juice - 1, 0);
+
+                                if (has_hit_player) {
+                                        hsp = 0;
+                                }
+
                                 if (!special_down || beam_juice <= 0) {
                                         window = 5;
                                         window_timer = 0;
