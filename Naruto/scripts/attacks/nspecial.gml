@@ -118,3 +118,4 @@ set_hitbox_value(AT_NSPECIAL, 2, HG_HIT_LOCKOUT, 5);
 set_hitbox_value(AT_NSPECIAL, 2, HG_HIT_SFX, asset_get("sfx_blow_medium2"));
 set_hitbox_value(AT_NSPECIAL, 2, HG_EXTENDED_PARRY_STUN, 1);
 set_hitbox_value(AT_NSPECIAL, 2, HG_IGNORES_PROJECTILES, 1);
+set_hitbox_value(AT_NSPECIAL, 2, HG_IGNORES_PROJECTILES, 1);
