@@ -87,6 +87,20 @@ case AT_NSPECIAL:
                 has_hit_player = true;
                 rasengan_hit_count += 1;
                 my_hitboxID.damage = 1 + floor(rasengan_hit_count * 0.5);
+                // stop Naruto from sliding through the opponent and trigger finisher
+                if (window == 3) {
+                        hsp = 0;
+                        window = 4;
+                        window_timer = 0;
+                }
+                break;
+        }
+        if (my_hitboxID.hit_priority == 1) break;
+case AT_NSPECIAL:
+        if (doing_naruto_rasengan) {
+                has_hit_player = true;
+                rasengan_hit_count += 1;
+                my_hitboxID.damage = 1 + floor(rasengan_hit_count * 0.5);
                 break;
         }
         if (my_hitboxID.hit_priority == 1) break;
@@ -101,6 +115,16 @@ case AT_NSPECIAL:
 			//pass on the charge strength of this projectile.
 			rasen.proj_nspecial_charge = my_hitboxID.proj_nspecial_charge;
 		//break;
+                case 2:
+                        // multihit projectile: drag player towards projectile.
+                        if (hit_player_obj.state_cat == SC_HITSTUN) {
+                                hit_player_obj.x += round((my_hitboxID.x - hit_player_obj.x) * my_hitboxID.proj_magnet_strength);
+                                var half_height = clamp(round(hit_player_obj.char_height / 2), 20, 50);
+                                hit_player_obj.y += round(((my_hitboxID.y + half_height) - hit_player_obj.y) * my_hitboxID.proj_magnet_strength);
+                        }
+                        rasengan_hit_count += 1;
+                        my_hitboxID.damage = 1 + floor(rasengan_hit_count * 0.5);
+                break;
                 case 2:
                         // multihit projectile: drag player towards projectile.
                         if (hit_player_obj.state_cat == SC_HITSTUN) {
