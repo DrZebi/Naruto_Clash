@@ -237,7 +237,8 @@ switch(attack) {
 	case AT_NSPECIAL:
 		//rasengan
 		
-		
+		//set doing_naruto_rasengan flag for clash detection
+		doing_naruto_rasengan = (window >= 6 && window <= 8);
 		
 		can_move = false;
 		//slow down movement if in the air
@@ -373,10 +374,49 @@ switch(attack) {
 				//limit fall speed
 				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
 				
+				//dash based on charge amount
+				if (window_timer == 1) {
+					var dash_speed = 4 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 12; // 4-16 speed based on charge
+					hsp = dash_speed * spr_dir;
+					
+					//initialize clash system variables
+					rasengan_length = 60 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 100; // 60-160 clash power based on charge
+					rasengan_clash_buddy = noone;
+					rasengan_clash_timer = 0;
+				}
+				
 				//play voice sfx at end of window
 				if (!is_end_of_window()) break;
 				if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) voice_play(VB_RASENGAN_MAX);
 				else voice_play(VB_RASENGAN);
+			break;
+			
+			case 7: //fire rasengan active - clash detection and logic
+				//limit fall speed
+				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
+				
+				//clash detection and logic
+				if (rasengan_clash_buddy != noone) {
+					rasengan_clash_logic();
+				}
+				else {
+					//look for clash opportunities with other Naruto players
+					var me = self;
+					with (oPlayer) {
+						if ("has_naruto_rasengan" in self && doing_naruto_rasengan && 
+							player != other.player && abs(x - other.x) < 100 && abs(y - other.y) < 50) {
+							//players are close enough for clash
+							var facing_each_other = (sign(other.x - x) == spr_dir && sign(x - other.x) == other.spr_dir);
+							if (facing_each_other) {
+								me.rasengan_clash_buddy = self;
+								rasengan_clash_buddy = me;
+								sound_play(asset_get("sfx_clairen_hit_strong"));
+								me.rasengan_clash_timer_max = max(me.rasengan_clash_timer_max, rasengan_clash_timer_max);
+								rasengan_clash_timer_max = max(me.rasengan_clash_timer_max, rasengan_clash_timer_max);
+							}
+						}
+					}
+				}
 			break;
 			
 		}
@@ -1331,3 +1371,48 @@ switch (probably_female * 2  + probably_male) {
 	default: argument0.naruto_sexyjutsu_gender = 1; return 1; 
 }
 return 1;
+
+#define rasengan_clash_logic
+
+if (!rasengan_clash_buddy.doing_naruto_rasengan) {
+	rasengan_clash_buddy.rasengan_clash_buddy = noone;
+	rasengan_clash_buddy = noone;
+}
+else {
+	if (rasengan_clash_timer >= rasengan_clash_timer_max) {
+		var winner = noone;
+		if (rasengan_length > rasengan_clash_buddy.rasengan_length) {
+			winner = self;
+		}
+		if (rasengan_length < rasengan_clash_buddy.rasengan_length) {
+			winner = rasengan_clash_buddy;
+		}
+		if (winner == self) {
+			//continue normal rasengan execution
+			window = 8;
+			window_timer = 0;
+		}
+		else {
+			//lose clash - go to recovery
+			window = 9;
+			window_timer = 0;
+		}
+		if (winner == rasengan_clash_buddy) {
+			//opponent wins - this player loses
+		}
+		else {
+			//opponent loses
+			rasengan_clash_buddy.window = 9;
+			rasengan_clash_buddy.window_timer = 0;
+		}
+	}
+	else {
+		rasengan_clash_timer++;
+		if (special_pressed) {
+			clear_button_buffer(PC_SPECIAL_PRESSED);
+			rasengan_length += 20;
+			rasengan_clash_buddy.rasengan_length -= 10;
+			sound_play(sound_get("snd_rasenganstartcharge"), false, noone, 0.8, 1 + rasengan_length * 0.002);
+		}
+	}
+}
