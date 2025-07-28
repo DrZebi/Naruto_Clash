@@ -87,6 +87,17 @@ if (!custom_clone) {
     naruto_special_timer = 0;               //
     naruto_nspecial_charge = 0;             //stores the amount of time that rasengan has been charged for.
     naruto_nspecial_sound = noone;          //stores the reference of the rasengan charging sound, so that it can be stopped when interrupted.
+    // rasengan charge / clash variables
+    beam_juice = 0;
+    beam_juice_max = 60 * 8;
+    beam_length = 0;
+    beam_dash_speed = 0;
+    beam_angle = 0;
+    beam_clash_buddy = noone;
+    beam_clash_timer = 0;
+    beam_clash_timer_max = 120;
+    was_fully_charged = false;
+    beam_newest_hbox = noone;
     naruto_taunt_spr = sprite_get("taunt_sexyjutsu_male");               //stores the reference of the sprite used for the special taunt, which varies depending on the opponent.
     naruto_attack_group_index = 0; //used to determine which set of attack indexes this clone will use.
     naruto_currently_has_dspecial_clone_active = 0; //counts how many dspecial clones naruto has. Updates in user_event5.gml and user_event6.gml.
