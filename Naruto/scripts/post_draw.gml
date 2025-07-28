@@ -34,12 +34,14 @@ if (get_gameplay_time() % 30 < 10) {
 if (state == PS_ATTACK_GROUND || state == PS_ATTACK_AIR) {
     if (attack == AT_NSPECIAL) {
         switch (window) {
-            case 2:
-                if (naruto_nspecial_charge > 0)
-                        draw_sprite_ext(master_player_id.spr_nspecial_charge, (state_timer / 4) % 3, x, y, spr_dir * 2, 2, 0, c_white, 1);
+            case 5:
+                if (naruto_nspecial_charge > 0) draw_sprite_ext(master_player_id.spr_nspecial_charge, (state_timer / 4) % 3, x, y, spr_dir * 2, 2, 0, c_white, 1);
             break;
-            case 4:
-                draw_sprite_ext(master_player_id.spr_nspecial_fire, (window_timer < 3) ? 0 : 2, x, y, spr_dir * 2, 2, 0, c_white, 1);
+            case 6:
+                draw_sprite_ext(master_player_id.spr_nspecial_fire, 0, x, y, spr_dir * 2, 2, 0, c_white, 1);
+            break;
+            case 7:
+                draw_sprite_ext(master_player_id.spr_nspecial_fire, 2, x, y, spr_dir * 2, 2, 0, c_white, 1);
             break;
         }
         

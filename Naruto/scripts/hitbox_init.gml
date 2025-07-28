@@ -2,8 +2,6 @@
 
 //initiate rasengan (nspecial)
 if (attack != AT_NSPECIAL || hit_priority == 1) exit;
-//initiate rasengan (nspecial)
-if (attack != AT_NSPECIAL || hit_priority == 1 || player_id.doing_naruto_rasengan) exit;
 
 
 switch (hbox_num) {

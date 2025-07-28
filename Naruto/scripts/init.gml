@@ -87,93 +87,12 @@ if (!custom_clone) {
     naruto_special_timer = 0;               //
     naruto_nspecial_charge = 0;             //stores the amount of time that rasengan has been charged for.
     naruto_nspecial_sound = noone;          //stores the reference of the rasengan charging sound, so that it can be stopped when interrupted.
-    // rasengan charge / clash variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_angle = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    was_fully_charged = false;
-    beam_newest_hbox = noone;
-    // rasengan charge / clash variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_angle = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    was_fully_charged = false;
-    beam_newest_hbox = noone;
     naruto_taunt_spr = sprite_get("taunt_sexyjutsu_male");               //stores the reference of the sprite used for the special taunt, which varies depending on the opponent.
     naruto_attack_group_index = 0; //used to determine which set of attack indexes this clone will use.
     naruto_currently_has_dspecial_clone_active = 0; //counts how many dspecial clones naruto has. Updates in user_event5.gml and user_event6.gml.
 	dspecial_clones_out = 0;
 	dspecial_clone_out = 0;
     naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
-    //rasengan / beam variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    doing_naruto_rasengan = false;
-    rasengan_charge = 0;
-    rasengan_charge_max = 60;
-    rasengan_hit_count = 0;
-    rasengan_max_hits = 0;
-    naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
-
-    //rasengan / beam variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    doing_naruto_rasengan = false;
-    rasengan_charge = 0;
-    rasengan_charge_max = 60;
-    rasengan_hit_count = 0;
-    rasengan_max_hits = 0;
-    naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
-
-    //rasengan / beam variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    doing_naruto_rasengan = false;
-    rasengan_charge = 0;
-    rasengan_charge_max = 60;
-    rasengan_hit_count = 0;
-    rasengan_max_hits = 0;
-    naruto_clone_despawn_article = noone; //reference of the article that will safely despawn clones. spawned in user_event3.gml.
-
-    //rasengan / beam variables
-    beam_juice = 0;
-    beam_juice_max = 60 * 8;
-    beam_length = 0;
-    beam_dash_speed = 0;
-    beam_clash_buddy = noone;
-    beam_clash_timer = 0;
-    beam_clash_timer_max = 120;
-    doing_naruto_rasengan = false;
-    rasengan_charge = 0;
-    rasengan_charge_max = 60;
-    rasengan_hit_count = 0;
-    rasengan_max_hits = 0;
-
     
     //move index constants. 
     //each clone needs their own index for certain moves.

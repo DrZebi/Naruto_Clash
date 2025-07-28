@@ -234,282 +234,154 @@ switch(attack) {
 	
 	break;
 	
-        case AT_NSPECIAL:
-                // Charged Rasengan dash
-                can_move = false;
-                if (free) hsp *= 0.99;
+	case AT_NSPECIAL:
+		//rasengan
+		
+		
+		
+		can_move = false;
+		//slow down movement if in the air
+		if (free) hsp *= 0.99;
+		
+		switch (window) {
+			
+			case 2: //startup
+				if (window_timer != 1) break;
+				//if at full charge, skip this window
+				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
+				//	window++;
+				//	window_timer = 0;
+				//	break;
+				//}
+				
+				//if a clone is nearby, use that clone instead of summoning a new one.
+				naruto_spawned_clone_reference = get_nearest_clone(c_naruto_clone_teamup_max_distance);
+				if (naruto_spawned_clone_reference != noone) {
+					//if a clone was found, set this clone's attack to AT_NSPECIAL_2.
+					clone_teamup_effect();
+					with (naruto_spawned_clone_reference) {
+						safely_set_attack(AT_NSPECIAL_2);
+						//skip startup window.
+						window++;
+						window_timer = 0;
+					}
+				}
+				else {
+					//if no clone was found, spawn a new clone, with the default startup time.
+					naruto_spawned_clone_reference = spawn_clone(x - spr_dir * 30, y);
+					if instance_exists(naruto_spawned_clone_reference) {
+						with (naruto_spawned_clone_reference) { safely_set_attack(AT_NSPECIAL_2);  }
+						spawn_hit_fx_2x(naruto_spawned_clone_reference.x, y, vfx_clone_smoke).depth = depth-1;
+					}
+				}
+			break;
+			
+			case 3: //wait for clone
+				//cycle this window until the clone is ready to help charge.
+				//skip ahead if this move is at max charge.
+				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge && !special_down) {
+				//	window += 3;
+				//	window_timer = 0;
+				//	break;
+				//}
+				
+				//cancel this attack if the clone has gone away, or isn't using the right attack
+				if (!clone_exists_and_is_using_attack(naruto_spawned_clone_reference, AT_NSPECIAL_2)) {
+					window = 9;
+					window_timer = 0;
+					break;
+				}
+				//when the clone reaches window 3 of at_nspecial_2, transition the player to the next window of at_nspecial.
+				if (naruto_spawned_clone_reference.window >= 3) {
+					window++;
+					window_timer = 0;
+					//clear the relevant button buffers, so that you can't cancel the attack -before- the charge window starts.
+					//clear_button_buffer(PC_LEFT_HARD_PRESSED);
+					//clear_button_buffer(PC_RIGHT_HARD_PRESSED);
+					clear_button_buffer(PC_SHIELD_PRESSED);
+					
+				}
+			break;
+			
+			case 5: //charge window
+				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
+				
+				//cancel this attack with a hard left/right press, or with the shield button
+				//var hard_press_dir = left_hard_pressed - right_hard_pressed;
+				//if (left_hard_pressed - right_hard_pressed != 0 || shield_pressed || jump_pressed) {
+				
+				//cancel this attack with a dodge.
+				if (shield_pressed) {
+					
+					print("shield pressed")
+					if (!free) {
+						//on the ground: cancel into a roll.
+						//clear_button_buffer(PC_SHIELD_PRESSED);
+						
+						switch ((right_down - left_down) * spr_dir) {
+							
+							case 1: 
+								set_state(PS_ROLL_FORWARD);
+							break;
+							case -1: 
+								
+								set_state(PS_ROLL_BACKWARD);
+							break;
+							default:
+								window = 9;
+								window_timer = 0;
+							break;
+						}
+					}
+					else {
+						//in the air: cancel into an airdodge if possible.
+						if (has_airdodge) {
+							has_airdodge = 0;
+							set_state(PS_AIR_DODGE);
+							//clear_button_buffer(PC_SHIELD_PRESSED);
+						}
+						//if no airdodge, cancel into nspecial's recovery.
+						else {
+							window = 9;
+							window_timer = 0;
+						}
+					}
+				}
 
-                switch (window) {
-                        case 1:
-                                if (window_timer == 1) {
-                                        beam_juice = 60;
-                                        beam_juice_max = 60 * 8;
-                                        beam_length = 0;
-                                        beam_dash_speed = 0;
-                                        beam_clash_buddy = noone;
-                                        beam_clash_timer = 0;
-                                        beam_clash_timer_max = 120;
-                                }
-                        break;
-
-                        case 2: // charge loop
-                                vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-                                if (special_down && beam_juice < beam_juice_max) {
-                                        beam_juice++;
-                                } else if (!special_down) {
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 3: // post-charge
-                                if (window_timer == 1) {
-                                        beam_length = 64 + ((beam_juice - 60) div 30) * 16;
-                                        beam_length = clamp(beam_length, 64, 320);
-                                        var dash_frames = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH) + get_window_value(AT_NSPECIAL, 5, AG_WINDOW_LENGTH);
-                                        beam_dash_speed = beam_length / dash_frames;
-                                }
-                                if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        window = 4;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 4: // dash start
-                                if (window_timer == 1) {
-                                        spawn_base_dust(x, y, "dash_start");
-                                        create_hitbox(AT_NSPECIAL, 1, x + 24 * spr_dir, y);
-                                }
-                                hsp = beam_dash_speed * spr_dir;
-                                if (beam_clash_buddy != noone) beam_clash_logic();
-                                if (has_hit_player) {
-                                        window = 6;
-                                        window_timer = 0;
-                                } else if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        window = 5;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 5: // dash active
-                                hsp = beam_dash_speed * spr_dir;
-                                if (beam_clash_buddy != noone) {
-                                        beam_clash_logic();
-                                } else if (has_hit_player || collision_rectangle(x-16, y-32, x+16, y+32, oPlayer, false, true)) {
-                                        window = 6;
-                                        window_timer = 0;
-                                } else if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        window = 6;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 6: // final hit
-                                if (window_timer == 1) {
-                                        var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
-                                        set_hitbox_value(AT_NSPECIAL, 2, HG_DAMAGE, 2 + round(charge_level * 4));
-                                        set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, 8 + round(charge_level * 8));
-                                        create_hitbox(AT_NSPECIAL, 2, x, y);
-                                }
-                                hsp = 0;
-                                if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        set_window_value(AT_NSPECIAL, 7, AG_WINDOW_LENGTH, clamp(floor(beam_juice / 30), 0, 6) + 6);
-                                        window = 7;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 7:
-                        case 8:
-                                hsp = 0;
-                        break;
-
-                }
-        break;
-        case AT_NSPECIAL:
-                // Charged Rasengan dash
-                can_move = false;
-                if (free) hsp *= 0.99;
-
-                switch (window) {
-                        case 1:
-                                if (window_timer == 1) {
-                                        beam_juice = 60;
-                                        beam_juice_max = 60 * 8;
-                                        beam_length = 0;
-                                        beam_dash_speed = 0;
-                                        beam_clash_buddy = noone;
-                                        beam_clash_timer = 0;
-                                        beam_clash_timer_max = 120;
-                                }
-                        break;
-
-                        case 2: // charge loop
-                                vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-                                if (special_down && beam_juice < beam_juice_max) {
-                                        beam_juice++;
-                                } else if (!special_down) {
-                                        window = 3;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 3: // post-charge
-                                if (window_timer == 1) {
-                                        beam_length = 64 + ((beam_juice - 60) div 30) * 16;
-                                        beam_length = clamp(beam_length, 64, 320);
-                                        var dash_frames = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH) + get_window_value(AT_NSPECIAL, 5, AG_WINDOW_LENGTH);
-                                        beam_dash_speed = beam_length / dash_frames;
-                                }
-                                if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        window = 4;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 4: // dash start
-                                if (window_timer == 1) {
-                                        spawn_base_dust(x, y, "dash_start");
-                                        create_hitbox(AT_NSPECIAL, 1, x + 24 * spr_dir, y);
-                                }
-                                hsp = beam_dash_speed * spr_dir;
-                                if (beam_clash_buddy != noone) beam_clash_logic();
-                        break;
-
-                        case 5: // dash active
-                                hsp = beam_dash_speed * spr_dir;
-                                if (beam_clash_buddy != noone) {
-                                        beam_clash_logic();
-                                } else if (collision_rectangle(x-16, y-32, x+16, y+32, oPlayer, false, true)) {
-                                        window = 6;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 6: // final hit
-                                if (window_timer == 1) {
-                                        var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
-                                        set_hitbox_value(AT_NSPECIAL, 2, HG_DAMAGE, 2 + round(charge_level * 4));
-                                        set_hitbox_value(AT_NSPECIAL, 2, HG_BASE_KNOCKBACK, 8 + round(charge_level * 8));
-                                        create_hitbox(AT_NSPECIAL, 2, x, y);
-                                }
-                                hsp = 0;
-                                if (window_timer >= get_window_value(attack, window, AG_WINDOW_LENGTH)) {
-                                        set_window_value(AT_NSPECIAL, 7, AG_WINDOW_LENGTH, clamp(floor(beam_juice / 30), 0, 6) + 6);
-                                        window = 7;
-                                        window_timer = 0;
-                                }
-                        break;
-
-                        case 7:
-                        case 8:
-                                hsp = 0;
-                        break;
-
-                }
-        break;
+				//stop charging if the special button is not held
+				else if (!special_down) {
+					window++;
+					window_timer = 0;
+					break;
+				}
+				
+				//charging sfx
+				if (naruto_nspecial_charge == 1 && naruto_nspecial_charge != c_naruto_nspecial_max_charge) {
+					voice_play(VB_RASENGAN_CHARGING);
+					naruto_nspecial_sound = sound_play(sound_get("snd_rasenganstartcharge"), 0, noone, 0.8, 1)
+				}
+				
+				//charge up
+				var check_full_charge = (naruto_nspecial_charge >= c_naruto_nspecial_max_charge);
+				naruto_nspecial_charge = min(naruto_nspecial_charge + 1, c_naruto_nspecial_max_charge);
+				if (!check_full_charge && naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
+					voice_play(VB_RASENGAN_FULLCHARGE);
+				}
+			break;
+			
+			case 6:
+				//limit fall speed
+				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
+				
+				//play voice sfx at end of window
+				if (!is_end_of_window()) break;
+				if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) voice_play(VB_RASENGAN_MAX);
+				else voice_play(VB_RASENGAN);
+			break;
+			
+		}
 	break;
 	
-case AT_NSPECIAL:
-    // Rasengan charge and dash special — nouvelle version inspirée du Kamehameha.
-    can_move = false;
-    switch (window) {
-        case 1:
-            if (window_timer == 1) {
-                beam_juice           = 60;
-                beam_juice_max       = 60 * 8;
-                beam_length          = 0;
-                beam_clash_buddy     = noone;
-                beam_clash_timer     = 0;
-                beam_clash_timer_max = 120;
-                hsp = clamp(hsp, -2, 2);
-                vsp = min(vsp, 3);
-            }
-            can_fast_fall = false;
-            break;
-        case 2:
-            if (special_down && beam_juice < beam_juice_max) {
-                beam_juice++;
-            } else if (!special_down) {
-                window++;
-                window_timer = 0;
-            }
-            can_fast_fall = false;
-            break;
-        case 3:
-            if (window_timer == 1) {
-                beam_length = 64 + ((beam_juice - 60) div 30) * 16;
-                beam_length = clamp(beam_length, 64, 320);
-                var dash_frames = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH)
-                                + get_window_value(AT_NSPECIAL, 5, AG_WINDOW_LENGTH);
-                var dash_hspeed = beam_length / dash_frames;
-                beam_dash_speed = dash_hspeed;
-                var endlag_len = clamp(floor(beam_juice / 30), 0, 6) + 6;
-                set_window_value(AT_NSPECIAL, 7, AG_WINDOW_LENGTH, endlag_len);
-                set_window_value(AT_NSPECIAL, 8, AG_WINDOW_LENGTH, endlag_len);
-            }
-            window++;
-            window_timer = 0;
-            can_fast_fall = false;
-            break;
-        case 4:
-            if (window_timer == 1) {
-                spawn_base_dust(x, y, "dash_start");
-                create_hitbox(AT_NSPECIAL, 2, x + 0, y - 30);
-            }
-            hsp = beam_dash_speed * spr_dir;
-            if (beam_clash_buddy != noone) {
-                beam_clash_logic();
-            }
-            can_fast_fall = false;
-            break;
-        case 5:
-            hsp = beam_dash_speed * spr_dir;
-            if (beam_clash_buddy != noone) {
-                beam_clash_logic();
-            }
-            if (is_end_of_window()) {
-                destroy_hitboxes();
-                window++;
-                window_timer = 0;
-            }
-            can_fast_fall = false;
-            break;
-        case 6:
-            hsp = 0;
-            if (window_timer == 1) {
-                var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
-                set_hitbox_value(AT_NSPECIAL, 3, HG_DAMAGE, 2 + round(charge_level * 4));
-                set_hitbox_value(AT_NSPECIAL, 3, HG_BASE_KNOCKBACK, 8 + round(charge_level * 8));
-                create_hitbox(AT_NSPECIAL, 3, x + 0, y - 30);
-                destroy_hitboxes();
-            }
-            if (is_end_of_window()) {
-                window++;
-                window_timer = 0;
-            }
-            can_fast_fall = false;
-            break;
-        case 7:
-            hsp = 0;
-            if (is_end_of_window()) {
-                window++;
-                window_timer = 0;
-            }
-            can_fast_fall = false;
-            break;
-        case 8:
-            hsp = 0;
-            if (is_end_of_window()) {
-                doing_naruto_rasengan = false;
-            }
-            can_fast_fall = false;
-            break;
-        default:
-            break;
-    }
-    break;
-
 	case AT_NSPECIAL_2:
 		//'clone' part of nspecial.
 		var master_is_using_nspecial;
@@ -1250,7 +1122,7 @@ with (oPlayer) {
 
 #define beam_clash_logic
 
-if !beam_clash_buddy.doing_goku_beam && !beam_clash_buddy.doing_naruto_rasengan{
+if !beam_clash_buddy.doing_goku_beam{
 	beam_clash_buddy.beam_clash_buddy = noone;
 	beam_clash_buddy = noone;
 }
