@@ -318,6 +318,106 @@ switch(attack) {
         break;
 	break;
 	
+case AT_NSPECIAL:
+    // Rasengan charge and dash special — nouvelle version inspirée du Kamehameha.
+    can_move = false;
+    switch (window) {
+        case 1:
+            if (window_timer == 1) {
+                beam_juice           = 60;
+                beam_juice_max       = 60 * 8;
+                beam_length          = 0;
+                beam_clash_buddy     = noone;
+                beam_clash_timer     = 0;
+                beam_clash_timer_max = 120;
+                hsp = clamp(hsp, -2, 2);
+                vsp = min(vsp, 3);
+            }
+            can_fast_fall = false;
+            break;
+        case 2:
+            if (special_down && beam_juice < beam_juice_max) {
+                beam_juice++;
+            } else if (!special_down) {
+                window++;
+                window_timer = 0;
+            }
+            can_fast_fall = false;
+            break;
+        case 3:
+            if (window_timer == 1) {
+                beam_length = 64 + ((beam_juice - 60) div 30) * 16;
+                beam_length = clamp(beam_length, 64, 320);
+                var dash_frames = get_window_value(AT_NSPECIAL, 4, AG_WINDOW_LENGTH)
+                                + get_window_value(AT_NSPECIAL, 5, AG_WINDOW_LENGTH);
+                var dash_hspeed = beam_length / dash_frames;
+                beam_dash_speed = dash_hspeed;
+                var endlag_len = clamp(floor(beam_juice / 30), 0, 6) + 6;
+                set_window_value(AT_NSPECIAL, 7, AG_WINDOW_LENGTH, endlag_len);
+                set_window_value(AT_NSPECIAL, 8, AG_WINDOW_LENGTH, endlag_len);
+            }
+            window++;
+            window_timer = 0;
+            can_fast_fall = false;
+            break;
+        case 4:
+            if (window_timer == 1) {
+                spawn_base_dust(x, y, "dash_start");
+                create_hitbox(AT_NSPECIAL, 2, x + 0, y - 30);
+            }
+            hsp = beam_dash_speed * spr_dir;
+            if (beam_clash_buddy != noone) {
+                beam_clash_logic();
+            }
+            can_fast_fall = false;
+            break;
+        case 5:
+            hsp = beam_dash_speed * spr_dir;
+            if (beam_clash_buddy != noone) {
+                beam_clash_logic();
+            }
+            if (is_end_of_window()) {
+                destroy_hitboxes();
+                window++;
+                window_timer = 0;
+            }
+            can_fast_fall = false;
+            break;
+        case 6:
+            hsp = 0;
+            if (window_timer == 1) {
+                var charge_level = (beam_juice - 60) / (beam_juice_max - 60);
+                set_hitbox_value(AT_NSPECIAL, 3, HG_DAMAGE, 2 + round(charge_level * 4));
+                set_hitbox_value(AT_NSPECIAL, 3, HG_BASE_KNOCKBACK, 8 + round(charge_level * 8));
+                create_hitbox(AT_NSPECIAL, 3, x + 0, y - 30);
+                destroy_hitboxes();
+            }
+            if (is_end_of_window()) {
+                window++;
+                window_timer = 0;
+            }
+            can_fast_fall = false;
+            break;
+        case 7:
+            hsp = 0;
+            if (is_end_of_window()) {
+                window++;
+                window_timer = 0;
+            }
+            can_fast_fall = false;
+            break;
+        case 8:
+            hsp = 0;
+            if (is_end_of_window()) {
+                doing_naruto_rasengan = false;
+            }
+            can_fast_fall = false;
+            break;
+        default:
+            break;
+    }
+    break;
+
 	case AT_NSPECIAL_2:
 		//'clone' part of nspecial.
 		var master_is_using_nspecial;
@@ -1058,7 +1158,7 @@ with (oPlayer) {
 
 #define beam_clash_logic
 
-if !beam_clash_buddy.doing_goku_beam{
+if !beam_clash_buddy.doing_goku_beam && !beam_clash_buddy.doing_naruto_rasengan{
 	beam_clash_buddy.beam_clash_buddy = noone;
 	beam_clash_buddy = noone;
 }
