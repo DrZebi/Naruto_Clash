@@ -9,6 +9,10 @@ set_attack_value(AT_NSPECIAL, AG_SPRITE, sprite_get("nspecial"));
 set_attack_value(AT_NSPECIAL, AG_NUM_WINDOWS, 10);
 set_attack_value(AT_NSPECIAL, AG_HURTBOX_SPRITE, sprite_get("nspecial_hurt"));
 
+//initialize clash system variables
+rasengan_clash_timer_max = 60; //maximum duration for rasengan clashes
+beam_clash_timer_max = 60; //maximum duration for beam clashes
+
 
 //startup
 set_window_value(AT_NSPECIAL, 1, AG_WINDOW_LENGTH, 2);
