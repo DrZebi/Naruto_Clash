@@ -379,10 +379,25 @@ switch(attack) {
 					var dash_speed = 4 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 12; // 4-16 speed based on charge
 					hsp = dash_speed * spr_dir;
 					
-					//initialize clash system variables
+					//initialize clash system variables (both rasengan and beam compatibility)
 					rasengan_length = 60 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 100; // 60-160 clash power based on charge
 					rasengan_clash_buddy = noone;
 					rasengan_clash_timer = 0;
+					
+					//beam clash compatibility variables
+					beam_length = rasengan_length;
+					beam_juice = 60 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 420; // 60-480 beam energy
+					beam_clash_buddy = noone;
+					beam_clash_timer = 0;
+					beam_angle = 0; //rasengan is horizontal
+				}
+				
+				//check for special button release to trigger dash
+				if (!special_down && window_timer > 5) {
+					//trigger additional dash when special is released
+					var release_dash_speed = 8; //additional dash speed
+					hsp += release_dash_speed * spr_dir;
+					sound_play(asset_get("sfx_dash_start"));
 				}
 				
 				//play voice sfx at end of window
@@ -395,12 +410,23 @@ switch(attack) {
 				//limit fall speed
 				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
 				
+				//check for special button release to trigger dash (if not in clash)
+				if (!special_down && window_timer > 3 && rasengan_clash_buddy == noone && beam_clash_buddy == noone) {
+					//trigger additional dash when special is released during active frames
+					var release_dash_speed = 6; //additional dash speed during active frames
+					hsp += release_dash_speed * spr_dir;
+					sound_play(asset_get("sfx_dash_start"));
+				}
+				
 				//clash detection and logic
 				if (rasengan_clash_buddy != noone) {
 					rasengan_clash_logic();
 				}
+				else if (beam_clash_buddy != noone) {
+					beam_clash_logic();
+				}
 				else {
-					//look for clash opportunities with other Naruto players
+					//look for clash opportunities with other Naruto players (rasengan vs rasengan)
 					var me = self;
 					with (oPlayer) {
 						if ("has_naruto_rasengan" in self && doing_naruto_rasengan && 
@@ -413,6 +439,28 @@ switch(attack) {
 								sound_play(asset_get("sfx_clairen_hit_strong"));
 								me.rasengan_clash_timer_max = max(me.rasengan_clash_timer_max, rasengan_clash_timer_max);
 								rasengan_clash_timer_max = max(me.rasengan_clash_timer_max, rasengan_clash_timer_max);
+							}
+						}
+					}
+					
+					//look for clash opportunities with Goku/Cell beam users (rasengan vs beam)
+					if (rasengan_clash_buddy == noone) {
+						with (oPlayer) {
+							if ("has_goku_beam" in self && doing_goku_beam && player != other.player &&
+								abs(x - other.x) < 150 && abs(y - other.y) < 80) {
+								//players are close enough for beam clash
+								var facing_each_other = (sign(other.x - x) == spr_dir && sign(x - other.x) == other.spr_dir);
+								if (facing_each_other) {
+									me.beam_clash_buddy = self;
+									beam_clash_buddy = me;
+									sound_play(asset_get("sfx_clairen_hit_strong"));
+									//sync clash timers
+									me.beam_clash_timer_max = max(me.beam_clash_timer_max, beam_clash_timer_max);
+									beam_clash_timer_max = max(me.beam_clash_timer_max, beam_clash_timer_max);
+									//sync beam variables for compatibility
+									me.beam_length = me.rasengan_length;
+									beam_length = rasengan_length;
+								}
 							}
 						}
 					}
@@ -1162,42 +1210,58 @@ with (oPlayer) {
 
 #define beam_clash_logic
 
-if !beam_clash_buddy.doing_goku_beam{
+//check if the clash buddy is still doing a beam attack
+if (!beam_clash_buddy.doing_goku_beam && !beam_clash_buddy.doing_naruto_rasengan) {
 	beam_clash_buddy.beam_clash_buddy = noone;
 	beam_clash_buddy = noone;
 }
-else{
-	if beam_clash_timer >= beam_clash_timer_max{
+else {
+	if (beam_clash_timer >= beam_clash_timer_max) {
 		var winner = noone;
-		if beam_length > beam_clash_buddy.beam_length{
+		if (beam_length > beam_clash_buddy.beam_length) {
 			winner = self;
 		}
-		if beam_length < beam_clash_buddy.beam_length{
+		if (beam_length < beam_clash_buddy.beam_length) {
 			winner = beam_clash_buddy;
 		}
-		if winner == self{
-			window = 5;
+		if (winner == self) {
+			//Naruto wins - continue to recovery window
+			window = 8;
 			window_timer = 0;
 		}
-		else{
-			beam_juice = 0;
+		else {
+			//Naruto loses - go to recovery
+			window = 9;
+			window_timer = 0;
 		}
-		if winner == beam_clash_buddy{
-			
+		if (winner == beam_clash_buddy) {
+			//opponent wins - this player loses
 		}
-		else{
-			beam_clash_buddy.beam_juice = 0;
+		else {
+			//opponent loses - set them to lose state
+			if ("beam_juice" in beam_clash_buddy) {
+				beam_clash_buddy.beam_juice = 0;
+			}
+			if ("rasengan_length" in beam_clash_buddy) {
+				beam_clash_buddy.window = 9;
+				beam_clash_buddy.window_timer = 0;
+			}
 		}
 	}
-	else{
+	else {
 		beam_clash_timer++;
-		if special_pressed{
+		if (special_pressed) {
 			clear_button_buffer(PC_SPECIAL_PRESSED);
-			beam_length += 32;
-			beam_clash_buddy.beam_length -= 32;
-			beam_juice = min(beam_juice + 20, beam_juice_max);
-			beam_clash_buddy.beam_juice = max(beam_clash_buddy.beam_juice - 10, 10);
-			sound_play(sfx_dbfz_kame_charge, false, noone, 1, 1 + beam_juice * 0.001);
+			beam_length += 20; //Naruto gains less per press than Goku/Cell for balance
+			beam_clash_buddy.beam_length -= 15;
+			
+			//sync rasengan variables for consistency
+			rasengan_length = beam_length;
+			if ("rasengan_length" in beam_clash_buddy) {
+				beam_clash_buddy.rasengan_length = beam_clash_buddy.beam_length;
+			}
+			
+			sound_play(sound_get("snd_rasenganstartcharge"), false, noone, 0.8, 1 + beam_length * 0.002);
 		}
 	}
 }

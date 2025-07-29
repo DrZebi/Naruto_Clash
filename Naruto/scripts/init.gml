@@ -91,11 +91,23 @@ if (!custom_clone) {
     //clash system variables (similar to Goku's beam clash)
     has_naruto_rasengan = true;              //flag to identify Naruto for clash detection
     doing_naruto_rasengan = false;           //true when actively using nspecial
-    rasengan_clash_buddy = noone;            //reference to the other Naruto in a clash
+    rasengan_clash_buddy = noone;            //reference to the other player in a clash
     rasengan_clash_timer = 0;                //timer for clash duration
     rasengan_clash_timer_max = 120;          //maximum clash duration (2 seconds)
     rasengan_length = 0;                     //clash power/length variable
     rasengan_newest_hbox = noone;            //reference to newest rasengan hitbox
+    
+    //beam clash compatibility variables for clashing with Goku/Cell
+    has_goku_beam = true;                    //flag for compatibility with Goku/Cell clash system
+    doing_goku_beam = false;                 //will be true when using nspecial clash
+    beam_clash_buddy = noone;                //reference to the other beam user in a clash
+    beam_clash_timer = 0;                    //timer for beam clash duration
+    beam_clash_timer_max = 120;              //maximum beam clash duration
+    beam_length = 0;                         //beam clash power/length variable
+    beam_juice = 0;                          //beam energy/charge variable
+    beam_juice_max = 480;                    //maximum beam energy
+    beam_newest_hbox = noone;                //reference to newest beam hitbox
+    beam_angle = 0;                          //beam angle for clash detection
     naruto_taunt_spr = sprite_get("taunt_sexyjutsu_male");               //stores the reference of the sprite used for the special taunt, which varies depending on the opponent.
     naruto_attack_group_index = 0; //used to determine which set of attack indexes this clone will use.
     naruto_currently_has_dspecial_clone_active = 0; //counts how many dspecial clones naruto has. Updates in user_event5.gml and user_event6.gml.

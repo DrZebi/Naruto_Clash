@@ -69,6 +69,11 @@ if (is_master_player) {
 		naruto_nspecial_sound = noone;
 	}
 	
+	//update beam clash flags for Goku/Cell compatibility
+	var phone_attacking = (state == PS_ATTACK_AIR || state == PS_ATTACK_GROUND);
+	doing_goku_beam = (phone_attacking && attack == AT_NSPECIAL && window == clamp(window, 6, 8));
+	doing_naruto_rasengan = doing_goku_beam; //keep original rasengan flag in sync
+	
 	// MunoPhone Touch code - don't touch
 	// should be at TOP of file
 
