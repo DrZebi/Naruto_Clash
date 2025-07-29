@@ -97,6 +97,10 @@ if (!custom_clone) {
     rasengan_length = 0;                     //clash power/length variable
     rasengan_newest_hbox = noone;            //reference to newest rasengan hitbox
     
+    //rasengan dash improvement variables
+    naruto_rasengan_dash_used = false;       //prevents multiple dashes per rasengan
+    naruto_rasengan_release_buffer = 0;      //buffer for button release detection
+    
     //beam clash compatibility variables for clashing with Goku/Cell
     has_goku_beam = true;                    //flag for compatibility with Goku/Cell clash system
     doing_goku_beam = false;                 //will be true when using nspecial clash
