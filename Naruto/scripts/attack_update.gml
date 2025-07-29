@@ -375,9 +375,11 @@ switch(attack) {
 				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
 				
 				//dash based on charge amount
-				if (window_timer == 1) {
-					var dash_speed = 4 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 12; // 4-16 speed based on charge
-					hsp = dash_speed * spr_dir;
+                                if (window_timer == 1) {
+                                        var dash_speed = 4 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 12; // 4-16 speed based on charge
+                                        set_window_value(AT_NSPECIAL, 6, AG_WINDOW_HSPEED, dash_speed);
+                                        set_window_value(AT_NSPECIAL, 7, AG_WINDOW_HSPEED, dash_speed);
+                                        hsp = dash_speed * spr_dir;
 					
 					//initialize clash system variables (both rasengan and beam compatibility)
 					rasengan_length = 60 + (naruto_nspecial_charge / c_naruto_nspecial_max_charge) * 100; // 60-160 clash power based on charge
