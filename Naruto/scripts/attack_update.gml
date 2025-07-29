@@ -393,7 +393,7 @@ switch(attack) {
 				}
 				
 				//check for special button release to trigger dash
-				if (!special_down && window_timer > 5) {
+				if (!special_down && window_timer > 1) {
 					//trigger additional dash when special is released
 					var release_dash_speed = 8; //additional dash speed
 					hsp += release_dash_speed * spr_dir;
@@ -411,7 +411,7 @@ switch(attack) {
 				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
 				
 				//check for special button release to trigger dash (if not in clash)
-				if (!special_down && window_timer > 3 && rasengan_clash_buddy == noone && beam_clash_buddy == noone) {
+				if (!special_down && window_timer > 1 && rasengan_clash_buddy == noone && beam_clash_buddy == noone) {
 					//trigger additional dash when special is released during active frames
 					var release_dash_speed = 6; //additional dash speed during active frames
 					hsp += release_dash_speed * spr_dir;
