@@ -37,7 +37,7 @@ c_naruto_dspecial_cooldown_time = 300;
 c_naruto_nspecial_max_fall_speed = 4;
 
 //maximum time, in frames, that NSpecial can be charged for. 
-c_naruto_nspecial_max_charge = 100;
+c_naruto_nspecial_max_charge = 480; // match Goku's beam charge time
 
 //---
 
