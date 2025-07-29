@@ -240,6 +240,19 @@ switch(attack) {
 		//set doing_naruto_rasengan flag for clash detection
 		doing_naruto_rasengan = (window >= 6 && window <= 8);
 		
+		//initialize dash tracking variable on attack start
+		if (window == 1 && window_timer == 1) {
+			naruto_rasengan_dash_used = false;
+			naruto_rasengan_release_buffer = 0;
+		}
+		
+		//track button release with a small buffer
+		if (!special_down) {
+			naruto_rasengan_release_buffer = min(naruto_rasengan_release_buffer + 1, 5);
+		} else {
+			naruto_rasengan_release_buffer = 0;
+		}
+		
 		can_move = false;
 		//slow down movement if in the air
 		if (free) hsp *= 0.99;
@@ -392,12 +405,14 @@ switch(attack) {
 					beam_angle = 0; //rasengan is horizontal
 				}
 				
-				//check for special button release to trigger dash
-				if (!special_down && window_timer > 5) {
-					//trigger additional dash when special is released
+				//check for special button release to trigger dash (improved logic)
+				if (!naruto_rasengan_dash_used && window_timer >= 2 && (naruto_rasengan_release_buffer > 0 || (!special_down && window_timer <= 4))) {
+					//trigger additional dash when special is released during startup
 					var release_dash_speed = 8; //additional dash speed
 					hsp += release_dash_speed * spr_dir;
 					sound_play(asset_get("sfx_dash_start"));
+					naruto_rasengan_dash_used = true; //prevent multiple dashes
+					naruto_rasengan_release_buffer = 0; //clear buffer
 				}
 				
 				//play voice sfx at end of window
@@ -410,12 +425,15 @@ switch(attack) {
 				//limit fall speed
 				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
 				
-				//check for special button release to trigger dash (if not in clash)
-				if (!special_down && window_timer > 3 && rasengan_clash_buddy == noone && beam_clash_buddy == noone) {
+				//check for special button release to trigger dash (if not in clash and dash not already used)
+				if (!naruto_rasengan_dash_used && rasengan_clash_buddy == noone && beam_clash_buddy == noone && 
+					window_timer >= 1 && (naruto_rasengan_release_buffer > 0 || (!special_down && window_timer <= 6))) {
 					//trigger additional dash when special is released during active frames
 					var release_dash_speed = 6; //additional dash speed during active frames
 					hsp += release_dash_speed * spr_dir;
 					sound_play(asset_get("sfx_dash_start"));
+					naruto_rasengan_dash_used = true; //prevent multiple dashes
+					naruto_rasengan_release_buffer = 0; //clear buffer
 				}
 				
 				//clash detection and logic
