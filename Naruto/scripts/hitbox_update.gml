@@ -1,4 +1,100 @@
 
+//----------------------------------------------------------------------------------------------------
+// BEAM CLASH LOGIC pour les projectiles Rasengan
+//----------------------------------------------------------------------------------------------------
+
+// Si c'est un projectile rasengan (hitbox 2 ou 3)
+if (attack == AT_NSPECIAL && (hbox_num == 2 || hbox_num == 3)) {
+    
+    // Marquer ce projectile comme étant un "beam" pour la compatibilité
+    if (player_id.doing_goku_beam) {
+        player_id.beam_newest_hbox = self;
+    }
+    
+    // Vérifier les collisions avec d'autres beams pour déclencher un clash
+    if (player_id.naruto_beam_clash_buddy == noone && !hitpause) {
+        
+        with (pHitBox) {
+            // Vérifier si c'est un beam adverse compatible
+            var is_enemy_beam = false;
+            var is_compatible = false;
+            
+            // Si c'est un autre joueur
+            if (player != other.player && player_id != other.player_id) {
+                
+                // Vérifier si c'est un Kamehameha de Goku
+                if (attack == AT_NSPECIAL && (hbox_num == 1 || hbox_num == 2)) {
+                    is_enemy_beam = true;
+                    is_compatible = true;
+                }
+                
+                // Vérifier si c'est un autre Rasengan de Naruto
+                if (attack == AT_NSPECIAL && (hbox_num == 2 || hbox_num == 3)) {
+                    is_enemy_beam = true;
+                    is_compatible = true;
+                }
+                
+                // Vérifier si c'est un beam de Cell
+                if (attack == AT_NSPECIAL && hbox_num == 1) {
+                    is_enemy_beam = true;
+                    is_compatible = true;
+                }
+            }
+            
+            // Si c'est un beam compatible et qu'ils sont proches
+            if (is_compatible && is_enemy_beam) {
+                var dist = point_distance(x, y, other.x, other.y);
+                if (dist < 64) { // Distance de clash
+                    
+                    // Déclencher le clash entre les deux joueurs
+                    other.player_id.naruto_beam_clash_buddy = player_id;
+                    player_id.naruto_beam_clash_buddy = other.player_id;
+                    
+                    // Si l'autre joueur a les variables de Goku
+                    if ("beam_clash_buddy" in player_id) {
+                        player_id.beam_clash_buddy = other.player_id;
+                    }
+                    if ("beam_clash_buddy" in other.player_id) {
+                        other.player_id.beam_clash_buddy = player_id;
+                    }
+                    
+                    // Son de clash
+                    sound_play(asset_get("sfx_blow_heavy1"));
+                    
+                    // Initialiser les énergies pour le clash
+                    other.player_id.naruto_rasengan_juice = max(other.player_id.naruto_rasengan_juice, 60);
+                    if ("beam_juice" in player_id) {
+                        player_id.beam_juice = max(player_id.beam_juice, 60);
+                    }
+                    if ("naruto_rasengan_juice" in player_id) {
+                        player_id.naruto_rasengan_juice = max(player_id.naruto_rasengan_juice, 60);
+                    }
+                    
+                    // Forcer les deux joueurs en mode clash
+                    with (other.player_id) {
+                        if (attack == AT_NSPECIAL && state == PS_ATTACK_GROUND || state == PS_ATTACK_AIR) {
+                            window = 11;
+                            window_timer = 0;
+                        }
+                    }
+                    
+                    with (player_id) {
+                        if (attack == AT_NSPECIAL && state == PS_ATTACK_GROUND || state == PS_ATTACK_AIR) {
+                            window = 11;
+                            window_timer = 0;
+                        }
+                    }
+                    
+                    // Détruire les projectiles qui ont causé le clash
+                    other.destroyed = true;
+                    destroyed = true;
+                    
+                    break; // Sortir de la boucle
+                }
+            }
+        }
+    }
+}
 
 switch (attack) {
 	case AT_EXTRA_1:

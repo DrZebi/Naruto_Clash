@@ -87,27 +87,6 @@ if (!custom_clone) {
     naruto_special_timer = 0;               //
     naruto_nspecial_charge = 0;             //stores the amount of time that rasengan has been charged for.
     naruto_nspecial_sound = noone;          //stores the reference of the rasengan charging sound, so that it can be stopped when interrupted.
-    
-    //clash system variables (similar to Goku's beam clash)
-    has_naruto_rasengan = true;              //flag to identify Naruto for clash detection
-    doing_naruto_rasengan = false;           //true when actively using nspecial
-    rasengan_clash_buddy = noone;            //reference to the other player in a clash
-    rasengan_clash_timer = 0;                //timer for clash duration
-    rasengan_clash_timer_max = 120;          //maximum clash duration (2 seconds)
-    rasengan_length = 0;                     //clash power/length variable
-    rasengan_newest_hbox = noone;            //reference to newest rasengan hitbox
-    
-    //beam clash compatibility variables for clashing with Goku/Cell
-    has_goku_beam = true;                    //flag for compatibility with Goku/Cell clash system
-    doing_goku_beam = false;                 //will be true when using nspecial clash
-    beam_clash_buddy = noone;                //reference to the other beam user in a clash
-    beam_clash_timer = 0;                    //timer for beam clash duration
-    beam_clash_timer_max = 120;              //maximum beam clash duration
-    beam_length = 0;                         //beam clash power/length variable
-    beam_juice = 0;                          //beam energy/charge variable
-    beam_juice_max = 480;                    //maximum beam energy
-    beam_newest_hbox = noone;                //reference to newest beam hitbox
-    beam_angle = 0;                          //beam angle for clash detection
     naruto_taunt_spr = sprite_get("taunt_sexyjutsu_male");               //stores the reference of the sprite used for the special taunt, which varies depending on the opponent.
     naruto_attack_group_index = 0; //used to determine which set of attack indexes this clone will use.
     naruto_currently_has_dspecial_clone_active = 0; //counts how many dspecial clones naruto has. Updates in user_event5.gml and user_event6.gml.
@@ -138,7 +117,34 @@ if (!custom_clone) {
     //set constants in user_event0.gml.
     user_event(0);
     
-    
+ // Variables principales pour la compatibilité beam clash
+has_goku_beam = false;           // Flag pour indiquer qu'on peut faire des beams
+doing_goku_beam = false;         // Flag actif pendant qu'on fait un beam
+beam_newest_hbox = noone;        // Référence à la dernière hitbox de beam
+
+// Variables spécifiques au rasengan clash
+naruto_rasengan_juice = 0;              // Énergie actuelle du rasengan
+naruto_rasengan_juice_max = 480;        // Énergie maximum du rasengan
+naruto_rasengan_length = 0;             // Longueur du beam (comme Goku)
+naruto_has_updated_beam_kb = false;     // Flag pour les updates de knockback
+naruto_beam_clash_buddy = noone;        // Référence à l'adversaire en clash
+naruto_beam_clash_timer = 0;            // Timer du clash actuel
+naruto_beam_clash_timer_max = 120;      // Durée maximum d'un clash (2 secondes)
+naruto_rasengan_angle = 0;              // Angle du rasengan (généralement 0 = droit devant)
+
+// Variables pour les effets et sounds
+naruto_clash_started = false;           // Flag pour éviter de jouer les effets plusieurs fois
+naruto_dash_collision = false;          // Flag temporaire pour détection de collision
+
+//----------------------------------------------------------------------------------------------------
+// CONSTANTES AJUSTABLES pour le beam clash
+//----------------------------------------------------------------------------------------------------
+
+c_naruto_clash_detection_distance = 80;        // Distance pour détecter un clash potentiel
+c_naruto_clash_mash_power_gain = 20;           // Énergie gagnée en mashant special
+c_naruto_clash_opponent_power_loss = 10;       // Énergie perdue par l'adversaire
+c_naruto_clash_min_energy_for_win = 30;        // Énergie minimum pour gagner un clash
+
 }
 else {
     //for clones specifically:
