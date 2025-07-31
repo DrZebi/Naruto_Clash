@@ -156,7 +156,7 @@ set_hitbox_value(AT_NSPECIAL, 2, HG_TECHABLE, 1);
 
 //rasengan - final hitbox
 set_hitbox_value(AT_NSPECIAL, 3, HG_HITBOX_TYPE, 2);
-set_hitbox_value(AT_NSPECIAL, 3, HG_WINDOW, 20);
+set_hitbox_value(AT_NSPECIAL, 3, HG_WINDOW, 7); // Fixed: using existing window 7
 set_hitbox_value(AT_NSPECIAL, 3, HG_WINDOW_CREATION_FRAME, 0);
 set_hitbox_value(AT_NSPECIAL, 3, HG_LIFETIME, 4);
 set_hitbox_value(AT_NSPECIAL, 3, HG_HITBOX_X, 0);

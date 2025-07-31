@@ -15,6 +15,10 @@ if (attack == AT_NSPECIAL && (hbox_num == 2 || hbox_num == 3)) {
     if (player_id.naruto_beam_clash_buddy == noone && !hitpause) {
         
         with (pHitBox) {
+            // Early distance check for performance optimization
+            var dist = point_distance(x, y, other.x, other.y);
+            if (dist > 128) continue; // Skip if too far away
+            
             // Vérifier si c'est un beam adverse compatible
             var is_enemy_beam = false;
             var is_compatible = false;
@@ -43,7 +47,7 @@ if (attack == AT_NSPECIAL && (hbox_num == 2 || hbox_num == 3)) {
             
             // Si c'est un beam compatible et qu'ils sont proches
             if (is_compatible && is_enemy_beam) {
-                var dist = point_distance(x, y, other.x, other.y);
+                // dist already calculated above for performance
                 if (dist < 64) { // Distance de clash
                     
                     // Déclencher le clash entre les deux joueurs
