@@ -117,34 +117,7 @@ if (!custom_clone) {
     //set constants in user_event0.gml.
     user_event(0);
     
- // Variables principales pour la compatibilité beam clash
-has_goku_beam = false;           // Flag pour indiquer qu'on peut faire des beams
-doing_goku_beam = false;         // Flag actif pendant qu'on fait un beam
-beam_newest_hbox = noone;        // Référence à la dernière hitbox de beam
-
-// Variables spécifiques au rasengan clash
-naruto_rasengan_juice = 0;              // Énergie actuelle du rasengan
-naruto_rasengan_juice_max = 480;        // Énergie maximum du rasengan
-naruto_rasengan_length = 0;             // Longueur du beam (comme Goku)
-naruto_has_updated_beam_kb = false;     // Flag pour les updates de knockback
-naruto_beam_clash_buddy = noone;        // Référence à l'adversaire en clash
-naruto_beam_clash_timer = 0;            // Timer du clash actuel
-naruto_beam_clash_timer_max = 120;      // Durée maximum d'un clash (2 secondes)
-naruto_rasengan_angle = 0;              // Angle du rasengan (généralement 0 = droit devant)
-
-// Variables pour les effets et sounds
-naruto_clash_started = false;           // Flag pour éviter de jouer les effets plusieurs fois
-naruto_dash_collision = false;          // Flag temporaire pour détection de collision
-
-//----------------------------------------------------------------------------------------------------
-// CONSTANTES AJUSTABLES pour le beam clash
-//----------------------------------------------------------------------------------------------------
-
-c_naruto_clash_detection_distance = 80;        // Distance pour détecter un clash potentiel
-c_naruto_clash_mash_power_gain = 20;           // Énergie gagnée en mashant special
-c_naruto_clash_opponent_power_loss = 10;       // Énergie perdue par l'adversaire
-c_naruto_clash_min_energy_for_win = 30;        // Énergie minimum pour gagner un clash
-
+    
 }
 else {
     //for clones specifically:

@@ -234,265 +234,149 @@ switch(attack) {
 	
 	break;
 	
-	// Trouvez la section AT_NSPECIAL dans attack_update.gml et remplacez-la par ceci :
+	case AT_NSPECIAL:
+		//rasengan
+		can_move = false;
+		if (free) hsp *= 0.99;
 
-case AT_NSPECIAL:
-    //rasengan
-    can_move = false;
-    if (free) hsp *= 0.99;
+		switch (window) {
+			
+			case 2: //startup
+				if (window_timer != 1) break;
+				//if at full charge, skip this window
+				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
+				//	window++;
+				//	window_timer = 0;
+				//	break;
+				//}
+				
+				//if a clone is nearby, use that clone instead of summoning a new one.
+				naruto_spawned_clone_reference = get_nearest_clone(c_naruto_clone_teamup_max_distance);
+				if (naruto_spawned_clone_reference != noone) {
+					//if a clone was found, set this clone's attack to AT_NSPECIAL_2.
+					clone_teamup_effect();
+					with (naruto_spawned_clone_reference) {
+						safely_set_attack(AT_NSPECIAL_2);
+						//skip startup window.
+						window++;
+						window_timer = 0;
+					}
+				}
+				else {
+					//if no clone was found, spawn a new clone, with the default startup time.
+					naruto_spawned_clone_reference = spawn_clone(x - spr_dir * 30, y);
+					if instance_exists(naruto_spawned_clone_reference) {
+						with (naruto_spawned_clone_reference) { safely_set_attack(AT_NSPECIAL_2);  }
+						spawn_hit_fx_2x(naruto_spawned_clone_reference.x, y, vfx_clone_smoke).depth = depth-1;
+					}
+				}
+			break;
+			
+			case 3: //wait for clone
+				//cycle this window until the clone is ready to help charge.
+				//skip ahead if this move is at max charge.
+				//if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge && !special_down) {
+				//	window += 3;
+				//	window_timer = 0;
+				//	break;
+				//}
+				
+				//cancel this attack if the clone has gone away, or isn't using the right attack
+				if (!clone_exists_and_is_using_attack(naruto_spawned_clone_reference, AT_NSPECIAL_2)) {
+					window = 9;
+					window_timer = 0;
+					break;
+				}
+				//when the clone reaches window 3 of at_nspecial_2, transition the player to the next window of at_nspecial.
+				if (naruto_spawned_clone_reference.window >= 3) {
+					window++;
+					window_timer = 0;
+					//clear the relevant button buffers, so that you can't cancel the attack -before- the charge window starts.
+					//clear_button_buffer(PC_LEFT_HARD_PRESSED);
+					//clear_button_buffer(PC_RIGHT_HARD_PRESSED);
+					clear_button_buffer(PC_SHIELD_PRESSED);
+					
+				}
+			break;
+			
+			case 5: //charge window
+				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
+				
+				//cancel this attack with a hard left/right press, or with the shield button
+				//var hard_press_dir = left_hard_pressed - right_hard_pressed;
+				//if (left_hard_pressed - right_hard_pressed != 0 || shield_pressed || jump_pressed) {
+				
+				//cancel this attack with a dodge.
+				if (shield_pressed) {
+					
+					print("shield pressed")
+					if (!free) {
+						//on the ground: cancel into a roll.
+						//clear_button_buffer(PC_SHIELD_PRESSED);
+						
+						switch ((right_down - left_down) * spr_dir) {
+							
+							case 1: 
+								set_state(PS_ROLL_FORWARD);
+							break;
+							case -1: 
+								
+								set_state(PS_ROLL_BACKWARD);
+							break;
+							default:
+								window = 9;
+								window_timer = 0;
+							break;
+						}
+					}
+					else {
+						//in the air: cancel into an airdodge if possible.
+						if (has_airdodge) {
+							has_airdodge = 0;
+							set_state(PS_AIR_DODGE);
+							//clear_button_buffer(PC_SHIELD_PRESSED);
+						}
+						//if no airdodge, cancel into nspecial's recovery.
+						else {
+							window = 9;
+							window_timer = 0;
+						}
+					}
+				}
 
-    switch (window) {
-        
-        case 2: //startup
-            if (window_timer != 1) break;
-            
-            //if a clone is nearby, use that clone instead of summoning a new one.
-            naruto_spawned_clone_reference = get_nearest_clone(c_naruto_clone_teamup_max_distance);
-            if (naruto_spawned_clone_reference != noone) {
-                //if a clone was found, set this clone's attack to AT_NSPECIAL_2.
-                clone_teamup_effect();
-                with (naruto_spawned_clone_reference) {
-                    safely_set_attack(AT_NSPECIAL_2);
-                    //skip startup window.
-                    window++;
-                    window_timer = 0;
-                }
-            }
-            else {
-                //if no clone was found, spawn a new clone, with the default startup time.
-                naruto_spawned_clone_reference = spawn_clone(x - spr_dir * 30, y);
-                if instance_exists(naruto_spawned_clone_reference) {
-                    with (naruto_spawned_clone_reference) { safely_set_attack(AT_NSPECIAL_2);  }
-                    spawn_hit_fx_2x(naruto_spawned_clone_reference.x, y, vfx_clone_smoke).depth = depth-1;
-                }
-            }
-        break;
-        
-        case 3: //wait for clone
-            //cycle this window until the clone is ready to help charge.
-            
-            //cancel this attack if the clone has gone away, or isn't using the right attack
-            if (!clone_exists_and_is_using_attack(naruto_spawned_clone_reference, AT_NSPECIAL_2)) {
-                window = 9;
-                window_timer = 0;
-                break;
-            }
-            //when the clone reaches window 3 of at_nspecial_2, transition the player to the next window of at_nspecial.
-            if (naruto_spawned_clone_reference.window >= 3) {
-                window++;
-                window_timer = 0;
-                clear_button_buffer(PC_SHIELD_PRESSED);
-            }
-        break;
-        
-        case 5: //charge window
-            vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-            
-            //cancel this attack with a dodge.
-            if (shield_pressed) {
-                
-                print("shield pressed")
-                if (!free) {
-                    //on the ground: cancel into a roll.
-                    switch ((right_down - left_down) * spr_dir) {
-                        
-                        case 1: 
-                            set_state(PS_ROLL_FORWARD);
-                        break;
-                        case -1: 
-                            set_state(PS_ROLL_BACKWARD);
-                        break;
-                        default:
-                            window = 9;
-                            window_timer = 0;
-                        break;
-                    }
-                }
-                else {
-                    //in the air: cancel into an airdodge if possible.
-                    if (has_airdodge) {
-                        has_airdodge = 0;
-                        set_state(PS_AIR_DODGE);
-                    }
-                    //if no airdodge, cancel into nspecial's recovery.
-                    else {
-                        window = 9;
-                        window_timer = 0;
-                    }
-                }
-            }
-
-            //stop charging if the special button is not held
-            else if (!special_down) {
-                window++;
-                window_timer = 0;
-                break;
-            }
-            
-            //charging sfx
-            if (naruto_nspecial_charge == 1 && naruto_nspecial_charge != c_naruto_nspecial_max_charge) {
-                voice_play(VB_RASENGAN_CHARGING);
-                naruto_nspecial_sound = sound_play(sound_get("snd_rasenganstartcharge"), 0, noone, 0.8, 1)
-            }
-            
-            //charge up
-            var check_full_charge = (naruto_nspecial_charge >= c_naruto_nspecial_max_charge);
-            naruto_nspecial_charge = min(naruto_nspecial_charge + 1, c_naruto_nspecial_max_charge);
-            if (!check_full_charge && naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
-                voice_play(VB_RASENGAN_FULLCHARGE);
-            }
-        break;
-        
-        case 6: //fire rasengan startup - DASH avec BEAM CLASH INIT
-            vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
-            
-            // INITIALISATION DES VARIABLES BEAM CLASH
-            if (window_timer == 1) {
-                // IMPORTANT: Activer les flags pour la compatibilité beam clash !
-                has_goku_beam = true;
-                doing_goku_beam = true;
-                
-                // Variables beam clash identiques à Goku
-                beam_juice = 60 + (naruto_nspecial_charge * 4);
-                beam_juice_max = 480;
-                beam_length = 0;
-                hsp = clamp(hsp, -2, 2);
-                vsp = min(vsp, 3);
-                has_updated_beam_kb = false;
-                beam_clash_buddy = noone;
-                beam_clash_timer = 0;
-                beam_clash_timer_max = 120;
-                beam_angle = 0;
-                was_fully_charged = (naruto_nspecial_charge >= c_naruto_nspecial_max_charge);
-                
-                // CALCUL DU DASH BASÉ SUR LE CHARGE
-                var dash_speed = 25 + (naruto_nspecial_charge * 2);
-                hsp = spr_dir * dash_speed;
-                
-                // Effet visuel de dash puissant
-                spawn_base_dust(x, y, "dash_start", spr_dir);
-                
-                // Sons et voix
-                if (was_fully_charged) voice_play(VB_RASENGAN_MAX);
-                else voice_play(VB_RASENGAN);
-            }
-            
-            hsp = clamp(hsp, -2, 2);
-            can_fast_fall = false;
-        break;
-        
-        case 7: //fire rasengan active - PROJECTILE avec BEAM CLASH
-            // IMPORTANT: Maintenir les flags actifs !
-            has_goku_beam = true;
-            doing_goku_beam = true;
-            
-            // Gestion du beam clash comme Goku
-            if (beam_clash_buddy != noone) {
-                beam_clash_logic();
-            }
-            else if !was_fully_charged && !hitpause && (was_parried || has_hit || place_meeting(x + lengthdir_x(beam_length + 32, beam_angle), y + lengthdir_y(beam_length, beam_angle), asset_get("par_block"))) {
-                if beam_juice > 0 {
-                    beam_juice -= 10;
-                }
-            }
-            else if !hitpause {
-                if beam_juice > 0 {
-                    beam_length += 32 + 64 * was_fully_charged;
-                    beam_juice -= 10;
-                }
-            }
-            
-            spawn_nspecial_hitbox(1);
-            
-            // DÉTECTION DE BEAM CLASH - identique à Goku
-            if (beam_clash_buddy == noone) {
-                var me = self;
-                with oPlayer if "has_goku_beam" in self && has_goku_beam && doing_goku_beam && abs((me.beam_angle + 180) % 360 - beam_angle % 360) < 45 && instance_exists(beam_newest_hbox) {
-                    var him = self;
-                    with beam_newest_hbox if distance_to_object(me.beam_newest_hbox) < (32 + 64 * (me.was_fully_charged || him.was_fully_charged)) {
-                        me.beam_clash_buddy = him;
-                        him.beam_clash_buddy = me;
-                        with me sound_play(asset_get("sfx_blow_heavy1"));
-                        me.beam_juice = max(me.beam_juice, 30);
-                        him.beam_juice = max(him.beam_juice, 30);
-                        me.beam_clash_timer_max = max(me.beam_clash_timer_max, him.beam_clash_timer_max);
-                        him.beam_clash_timer_max = max(me.beam_clash_timer_max, him.beam_clash_timer_max);
-                        // Transition vers window 11 pour le clash
-                        me.window = 11;
-                        me.window_timer = 0;
-                        him.window = 11;
-                        him.window_timer = 0;
-                    }
-                }
-            }
-            
-            hsp = 3;
-            vsp = min(vsp, 3);
-            can_fast_fall = false;
-            shake_camera(4, 1);
-        break;
-        
-        case 8: //recovery 1
-            // Désactiver les flags beam
-            has_goku_beam = false;
-            doing_goku_beam = false;
-            
-            vsp = min(vsp, 3);
-            hsp = max(hsp * 0.9, 1);
-            hsp_type = 2;
-            can_fast_fall = false;
-        break;
-        
-        case 9: //recovery 2
-            has_goku_beam = false;
-            doing_goku_beam = false;
-            vsp = min(vsp, 3);
-        break;
-        
-        case 10: //recovery 3
-            has_goku_beam = false;
-            doing_goku_beam = false;
-            vsp = min(vsp, 3);
-        break;
-        
-        // NOUVELLES FENÊTRES POUR LE BEAM CLASH
-        case 11: //beam clash loop
-            // IMPORTANT: Maintenir les flags actifs pendant le clash !
-            has_goku_beam = true;
-            doing_goku_beam = true;
-            
-            if (beam_clash_buddy != noone) {
-                beam_clash_logic();
-            }
-            else {
-                // Si pas de clash, retourner au flow normal
-                window = 12;
-                window_timer = 0;
-            }
-            
-            hsp = 0;
-            vsp = 0;
-            can_move = false;
-            can_fast_fall = false;
-            
-            if (window_timer % 2) {
-                spawn_base_dust(x - 20 * spr_dir + sin(window_timer + 2) * 6 * spr_dir, y, "dash");
-            }
-            shake_camera(1, 1);
-        break;
-        
-        case 12: //beam clash endlag
-            // Désactiver les flags après le clash
-            has_goku_beam = false;
-            doing_goku_beam = false;
-            
-            hsp = 0;
-            vsp = 0;
-            can_move = false;
-            can_fast_fall = false;
-        break;
-    }
-break;
+				//stop charging if the special button is not held
+				else if (!special_down) {
+					window++;
+					window_timer = 0;
+					break;
+				}
+				
+				//charging sfx
+				if (naruto_nspecial_charge == 1 && naruto_nspecial_charge != c_naruto_nspecial_max_charge) {
+					voice_play(VB_RASENGAN_CHARGING);
+					naruto_nspecial_sound = sound_play(sound_get("snd_rasenganstartcharge"), 0, noone, 0.8, 1)
+				}
+				
+				//charge up
+				var check_full_charge = (naruto_nspecial_charge >= c_naruto_nspecial_max_charge);
+				naruto_nspecial_charge = min(naruto_nspecial_charge + 1, c_naruto_nspecial_max_charge);
+				if (!check_full_charge && naruto_nspecial_charge >= c_naruto_nspecial_max_charge) {
+					voice_play(VB_RASENGAN_FULLCHARGE);
+				}
+			break;
+			
+			case 6:
+				//limit fall speed
+				vsp = min(vsp, c_naruto_nspecial_max_fall_speed);
+				
+				//play voice sfx at end of window
+				if (!is_end_of_window()) break;
+				if (naruto_nspecial_charge >= c_naruto_nspecial_max_charge) voice_play(VB_RASENGAN_MAX);
+				else voice_play(VB_RASENGAN);
+			break;
+			
+		}
+	break;
 	
 	case AT_NSPECIAL_2:
 		//'clone' part of nspecial.
@@ -1248,7 +1132,7 @@ else{
 			winner = beam_clash_buddy;
 		}
 		if winner == self{
-			window = 7; // Reprendre le flow normal de rasengan
+			window = 5;
 			window_timer = 0;
 		}
 		else{
@@ -1269,63 +1153,11 @@ else{
 			beam_clash_buddy.beam_length -= 32;
 			beam_juice = min(beam_juice + 20, beam_juice_max);
 			beam_clash_buddy.beam_juice = max(beam_clash_buddy.beam_juice - 10, 10);
-			// Son compatible avec le beam clash de Goku
-			sound_play(sound_get("snd_rasenganstartcharge"), false, noone, 1, 1 + beam_juice * 0.001);
+			sound_play(sfx_dbfz_kame_charge, false, noone, 1, 1 + beam_juice * 0.001);
 		}
 	}
 }
 
-#define spawn_nspecial_hitbox(num)
-
-if hitpause && num == 1 return;
-
-attack_end();
-
-var x1 = 72;
-var y1 = -40 + lengthdir_y(32, beam_angle);
-
-switch((abs(lengthdir_y(1, beam_angle)) > abs(lengthdir_y(1, 15))) * sign(lengthdir_y(1, beam_angle))){
-    case 1: // down
-        x1 = 74;
-        y1 = -6;
-        break;
-    case -1: // up
-        x1 = 60;
-        y1 = -72;
-        break;
-}
-
-var cur_x = x1;
-var cur_y = y1;
-
-set_hitbox_value(attack, num, HG_WIDTH, 64 + 16 * has_hit);
-set_hitbox_value(attack, num, HG_HEIGHT, 64 + 16 * has_hit);
-
-var ld_x = lengthdir_x(32, beam_angle) * spr_dir;
-var ld_y = lengthdir_y(32, beam_angle);
-
-// Pour la compatibilité beam clash, on utilise le projectile (hitbox 2) au lieu de la hitbox 1
-var hitbox_to_use = (num == 1 && window == 7) ? 2 : num;
-
-for (var i = 0; i * 32 < beam_length && i < 32 && cur_x == clamp(cur_x, -64, room_width + 64); i++){
-    if i % 3 == 0 || (i+1) * 32 >= beam_length{
-        if (i+1) * 32 >= beam_length{
-            set_hitbox_value(attack, hitbox_to_use, HG_WIDTH, 64 + 64 * has_hit);
-            set_hitbox_value(attack, hitbox_to_use, HG_HEIGHT, 64 + 64 * has_hit);
-        }
-        beam_newest_hbox = create_hitbox(attack, hitbox_to_use, round(x + cur_x * spr_dir), round(y + cur_y));
-        beam_newest_hbox.x_pos = round(cur_x * spr_dir);
-        beam_newest_hbox.y_pos = round(cur_y);
-        
-        // IMPORTANT: Marquer cette hitbox comme un projectile de beam pour la détection
-        beam_newest_hbox.can_hit_self = false;
-        beam_newest_hbox.enemies = 1;
-        beam_newest_hbox.walls = 0;
-        beam_newest_hbox.grounds = 0;
-    }
-    cur_x += ld_x;
-    cur_y += ld_y;
-}
 
 
 

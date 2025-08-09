@@ -145,33 +145,6 @@ else {
 		}
 	
 	}
-	if (doing_goku_beam && (state != PS_ATTACK_GROUND && state != PS_ATTACK_AIR)) {
-    doing_goku_beam = false;
-    has_goku_beam = false;
-    naruto_beam_clash_buddy = noone;
-    beam_newest_hbox = noone;
-}
-
-// Si on est en clash mais que le buddy n'existe plus ou n'est plus en attaque
-if (naruto_beam_clash_buddy != noone) {
-    if (!instance_exists(naruto_beam_clash_buddy) || 
-        (naruto_beam_clash_buddy.state != PS_ATTACK_GROUND && naruto_beam_clash_buddy.state != PS_ATTACK_AIR)) {
-        naruto_beam_clash_buddy = noone;
-        
-        // Si on était en mode clash, sortir vers le endlag
-        if (attack == AT_NSPECIAL && window == 11) {
-            window = 12;
-            window_timer = 0;
-        }
-    }
-}
-
-// Vérifier la compatibilité avec les autres personnages qui font des beams
-if (attack == AT_NSPECIAL && (window >= 6 && window <= 7)) {
-    has_goku_beam = true;
-    doing_goku_beam = true;
-}
-
 	
 }
 
